@@ -14,10 +14,10 @@ class GameBoard:
         """Makes a new game following the standard convention of putting 2 blocks of value 2 or 4 on the board"""
         
         self._clear_board()
-        # block_1 = GamePiece(valueList={2:0.7, 4:0.3})
-        block_1 = GamePiece(value=4)
+        block_1 = GamePiece(valueList={2:0.7, 4:0.3})
         self._place_piece(block_1)
-        # block_2 = GamePiece(valueList={2:0.7, 4:0.3})
+        block_2 = GamePiece(valueList={2:0.7, 4:0.3})
+        self._place_piece(block_2)
     
     def _place_piece(self, game_piece):
         """
@@ -113,18 +113,36 @@ class GamePiece:
             self.value = 0
         elif (len(valueList) == 0):
             self.value = value
+        elif (len(valueList) == 1):
+            # if one element in valueList, make that the answer
+            self.value = valueList.keys()[1]
         else:
 
             # First, assert that no element is a non-power of 2 AND that the probabilities add up to 100%
-            for k in valueList.keys():
+            sum_of_probabilities = 0
+            for k,v in valueList.items():
                 # This checks if the key is a power of 2 and does not equal 0
                 # https://stackoverflow.com/questions/600293/how-to-check-if-a-number-is-a-power-of-2
                 assert (k != 0) and ((k & (k - 1)) == 0)
-            sum_of_probabilities = 0
-            for v in valueList.values():
-                # Add each probability to the total
                 sum_of_probabilities += v
+                if v == 1.0:
+                    # if something an 100% chance, that's the value
+                    self.value = k
+                    return
+                
+            # This ensures that all of the probabilities add up to 1.0
             assert sum_of_probabilities == 1.0
+        
+            #  Now, we can actually find the value
+            #  Create a random number between 0 and 1
+            rand_num = random.random()
+            total_prob = 0.0
+            for k,v in valueList.items():
+                total_prob += v
+                if rand_num < total_prob:
+                    self.value = k
+                    return
+            
         
 
 board = GameBoard()
