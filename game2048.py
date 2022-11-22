@@ -4,16 +4,16 @@ class GameBoard:
     def __init__(self):
         """Creates an empty game board"""
         self.board = [[],[],[],[]] # 4x4 List of GamePiece objects
-        for r in range(len(4)):
-            for c in range(len(4)):
+        for r in range(4):
+            for c in range(4):
                 self.board[r][c] = GamePiece(empty=True)
     
-    def create_new_game():
+    def create_new_game(self):
         """Makes a new game following the standard convention of putting 2 blocks of value 2 or 4 on the board"""
         
-        
-        
+        self._clear_board()
         block_1 = GamePiece(valueList={2:0.7, 4:0.3})
+        self._place_piece
         block_2 = GamePiece(valueList={2:0.7, 4:0.3})
     
     def _place_piece(self, game_piece):
@@ -34,7 +34,7 @@ class GameBoard:
         """Clear the board to setup for a new game"""
         self.board = [[],[],[],[]]
 
-    def get_value(coord):
+    def get_value(self, coord):
         """
         :coord: A tuple i.e. (2,3) representing the row, column
         :return: the value on gameBoard of the tuple. -1 if coords not on the board
@@ -42,7 +42,8 @@ class GameBoard:
         # Case where the coordinate is not on the board
         if coord[0] < 0 or coord[0]>3 or coord[1] < 0 or coord[1] > 3:
             return -1
-        
+        else:
+            return self.board[coord[0], coord[1]]
     
     
 
@@ -79,5 +80,4 @@ class GamePiece:
             assert sum_of_probabilities == 1.0
         
 
-GameBoard()
-    
+board = GameBoard()
