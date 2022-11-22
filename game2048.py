@@ -31,7 +31,7 @@ class GameBoard:
             position = (random.randint(0,3), random.randint(0,3))
 
         # Because the loop stopped, it must have found an empty square. Now place the gamePiece in that square
-        print("Placing "+str(game_piece.value) + " at "+str(position))
+        # print("Placing "+str(game_piece.value) + " at "+str(position))
         self.board[position[0]][position[1]] = game_piece
 
     def _clear_board(self):
@@ -52,9 +52,10 @@ class GameBoard:
         else:
             return self.board[coord[0]][coord[1]].value
     
-    def print(self):
+    def print(self, smallBoard = False):
         """
         Prints the board in a human readable way
+        :smallBoard: Bool that prints the board in a smaller and more efficient way if True
         :return: Nothing
         """
 
@@ -66,7 +67,22 @@ class GameBoard:
                 if self.get_value((r,c)) != 0:
                     ts[r][c] = str(self.get_value((r,c)))
         # This thing is a monster because of string interpolation
-        empty_board = f"""
+
+        if smallBoard:
+            printed_board = f"""
+            ---------
+            |{ts[0][0]}|{ts[0][1]}|{ts[0][2]}|{ts[0][3]}|
+            ---------
+            |{ts[1][0]}|{ts[1][1]}|{ts[1][2]}|{ts[1][3]}|
+            ---------
+            |{ts[2][0]}|{ts[2][1]}|{ts[2][2]}|{ts[2][3]}|
+            ---------
+            |{ts[3][0]}|{ts[3][1]}|{ts[3][2]}|{ts[3][3]}|
+            ---------
+            """
+
+        else:
+            printed_board = f"""
             ------------------------------------------------                     
             |{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}|{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}|{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}|{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}|
             |{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}|{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}|{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}|{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}|
@@ -91,7 +107,7 @@ class GameBoard:
             
         """
         # self.__single_print_block()
-        print(empty_board)
+        print(printed_board)
 
     
 
@@ -147,4 +163,4 @@ class GamePiece:
 
 board = GameBoard()
 board.create_new_game()
-board.print()
+board.print(smallBoard = True)
