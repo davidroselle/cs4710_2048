@@ -3,7 +3,7 @@ import random
 class GameBoard:
     def __init__(self):
         """Creates an empty game board"""
-        self.board = [[],[],[],[]] # 4x4 List of GamePiece objects
+        self.board = [[None,None,None,None],[None,None,None,None],[None,None,None,None],[None,None,None,None]] # 4x4 List of GamePiece objects
         for r in range(4):
             for c in range(4):
                 self.board[r][c] = GamePiece(empty=True)
