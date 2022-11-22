@@ -160,7 +160,3 @@ class GamePiece:
                     return
             
         
-
-board = GameBoard()
-board.create_new_game()
-board.print(smallBoard = True)
