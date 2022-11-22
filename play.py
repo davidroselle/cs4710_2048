@@ -7,10 +7,10 @@ Main Program To Play The Game
 
 parser = argparse.ArgumentParser(description = "This program runs 2048 with given settings")
 parser.add_argument("-player", help = "self = you play; computer = computer plays")
-parser.add_argument("-outSize", help = "Small = small output, Large = large output. Default: Small")
+parser.add_argument("-outSize", help = "small = small output, large = large output. Default: small")
 args = parser.parse_args()
 
-if args.outSize == "Large":
+if args.outSize == "large":
     outputSmall = False
 else:
     outputSmall = True
@@ -19,11 +19,10 @@ else:
 if args.player == 'self' or args.player == None:
     board = GameBoard()
     board.create_new_game()
-    board.print(smallBoard = outputSmall)
+    
+    
 elif args.player == 'computer':
-    board = GameBoard()
-    board.create_new_game()
-    board.print(smallBoard = outputSmall)
+    print("Computer play not implemented yet!")
 else:
     print("Unknown arg for player: ", args.player)
 

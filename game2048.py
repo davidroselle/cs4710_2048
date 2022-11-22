@@ -1,5 +1,13 @@
 import math
 import random
+from enum import Enum
+
+ 
+class Direction(Enum):
+    UP = 1
+    DOWN = 2
+    LEFT = 3
+    RIGHT = 4
 class GameBoard:
     def __init__(self):
         """Creates an empty game board"""
@@ -18,6 +26,26 @@ class GameBoard:
         self._place_piece(block_1)
         block_2 = GamePiece(valueList={2:0.7, 4:0.3})
         self._place_piece(block_2)
+        self.begin_game()
+
+    def begin_game(self):
+        """TODO: Add logic for when you lose/win to break the loop\n Use WASD keys for now"""
+        while True:
+            next_move = input("\n\nNext Move (w,a,s,d): ")
+            if next_move == "w":
+                self.move(Direction.UP)
+            elif next_move == "a":
+                self.move(Direction.LEFT)
+            elif next_move == "s":
+                self.move(Direction.DOWN)
+            elif next_move == "d":
+                self.move(Direction.RIGHT)
+            elif next_move == "Q":
+                break
+            else:
+                print("Unrecognized move: '"+next_move+"'... Moves must be w, a, s, d followed by Enter Key. Q to Quit")
+                continue
+            self.print(smallBoard=True)
     
     def _place_piece(self, game_piece):
         """
@@ -52,6 +80,11 @@ class GameBoard:
         else:
             return self.board[coord[0]][coord[1]].value
     
+    def move(self,dir):
+        """Core function of when an key is pressed"""
+        print("Moved "+str(dir))
+
+
     def print(self, smallBoard = False):
         """
         Prints the board in a human readable way
