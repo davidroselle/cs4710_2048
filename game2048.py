@@ -4,24 +4,47 @@ class GameBoard:
     def __init__(self):
         """Creates an empty game board"""
         self.board = [[],[],[],[]] # 4x4 List of GamePiece objects
-    
+        for r in range(len(4)):
+            for c in range(len(4)):
+                self.board[r][c] = GamePiece(empty=True)
     
     def create_new_game():
         """Makes a new game following the standard convention of putting 2 blocks of value 2 or 4 on the board"""
         
-        block_1_position = (random.randint(0,3), random.randint(0,3))
-        block_2_position = (random.randint(0,3), random.randint(0,3))
+        
         
         block_1 = GamePiece(valueList={2:0.7, 4:0.3})
+        block_2 = GamePiece(valueList={2:0.7, 4:0.3})
     
-    def _place_piece(game_piece):
+    def _place_piece(self, game_piece):
         """
         Places a provided GamePiece onto the board on an empty space
         :param game_piece: a GamePiece object
     
         :return: nothing
         """
-        position = (random.randint(0,3), random.randint(0,3))
+        position = (-1,-1)
+        while self.get_value(position) != 0:
+            position = (random.randint(0,3), random.randint(0,3))
+
+        # Because the loop stopped, it must have found an empty square. Now place the gamePiece in that square
+        self.board[position[0]][position[1]] = game_piece
+
+    def _clear_board(self):
+        """Clear the board to setup for a new game"""
+        self.board = [[],[],[],[]]
+
+    def get_value(coord):
+        """
+        :coord: A tuple i.e. (2,3) representing the row, column
+        :return: the value on gameBoard of the tuple. -1 if coords not on the board
+        """
+        # Case where the coordinate is not on the board
+        if coord[0] < 0 or coord[0]>3 or coord[1] < 0 or coord[1] > 3:
+            return -1
+        
+    
+    
 
         
 
