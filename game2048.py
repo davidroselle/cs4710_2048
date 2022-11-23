@@ -32,11 +32,11 @@ class GameBoard:
         """TODO: Add logic for when you lose/win to break the loop\n Use WASD keys for now"""
         # printing controls for user
         print("Commands are as follows: ")
-        print("'W' or 'w' : Move Up")
-        print("'S' or 's' : Move Down")
-        print("'A' or 'a' : Move Left")
-        print("'D' or 'd' : Move Right")
-        print("'W' or 'w' : Quit game")
+        print("'W'/'w' : Up")
+        print("'S'/'s' : Down")
+        print("'A'/'a' : Left")
+        print("'D'/'d' : Right")
+        print("'W'/'w' : Quit game")
 
         print("Initial Board")
         self.print(smallBoard=True)
