@@ -30,23 +30,33 @@ class GameBoard:
 
     def begin_game(self):
         """TODO: Add logic for when you lose/win to break the loop\n Use WASD keys for now"""
+        # printing controls for user
+        print("Commands are as follows: ")
+        print("'W' or 'w' : Move Up")
+        print("'S' or 's' : Move Down")
+        print("'A' or 'a' : Move Left")
+        print("'D' or 'd' : Move Right")
+        print("'W' or 'w' : Quit game")
         while True:
-            next_move = input("\n\nNext Move (w,a,s,d): ")
-            if next_move == "w":
+            next_move = input("\n\nNext Move (w,a,s,d, or q to quit): ")
+            if next_move == "w" or next_move == "W":
                 self.move(Direction.UP)
-            elif next_move == "a":
+            elif next_move == "a" or next_move == "A":
                 self.move(Direction.LEFT)
-            elif next_move == "s":
+            elif next_move == "s" or next_move == "S":
                 self.move(Direction.DOWN)
-            elif next_move == "d":
+            elif next_move == "d" or next_move == "D":
                 self.move(Direction.RIGHT)
-            elif next_move == "Q":
+            elif next_move == "q" or next_move == "Q":
                 break
             else:
-                print("Unrecognized move: '"+next_move+"'... Moves must be w, a, s, d followed by Enter Key. Q to Quit")
+                print("Unrecognized move: '"+next_move+"'... Moves must be w, a, s, d followed by Enter Key. q to Quit")
                 continue
             self.print(smallBoard=True)
-    
+            if self.win_game() == True:
+                print("YOU WON THE GAME!")
+                break
+
     def _place_piece(self, game_piece):
         """
         Places a provided GamePiece onto the board on an empty space
@@ -68,6 +78,13 @@ class GameBoard:
         for r in range(4):
             for c in range(4):
                 self.board[r][c] = GamePiece(empty=True)
+    
+    def win_game(self):
+        for r in range(4):
+            for c in range(4):
+                if self.get_value((r,c)) == 2048:
+                    return True
+        return False
 
     def get_value(self, coord):
         """
@@ -192,4 +209,5 @@ class GamePiece:
                     self.value = k
                     return
             
+        
         
