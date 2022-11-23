@@ -43,6 +43,7 @@ class GameBoard:
     
         while True:
             next_move = input("\n\nNext Move (w,a,s,d, or q to quit): ")
+            # Before processing the move, see if there is a spot to put it (you lose it there is not)
             if (self._check_if_lose()):
                 print("YOU LOSE THE GAME")
                 break
