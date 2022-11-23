@@ -37,8 +37,15 @@ class GameBoard:
         print("'A' or 'a' : Move Left")
         print("'D' or 'd' : Move Right")
         print("'W' or 'w' : Quit game")
+
+        print("Initial Board")
+        self.print(smallBoard=True)
+    
         while True:
             next_move = input("\n\nNext Move (w,a,s,d, or q to quit): ")
+            if (self._check_if_lose()):
+                print("YOU LOSE THE GAME")
+                break
             if next_move == "w" or next_move == "W":
                 self.move(Direction.UP)
             elif next_move == "a" or next_move == "A":
@@ -59,12 +66,15 @@ class GameBoard:
 
     def _place_piece(self, game_piece):
         """
-        Places a provided GamePiece onto the board on an empty space
+        Places a provided GamePiece onto the board on an empty space \n
+        This will also check if you lose, as if a piece cannot be placed then you lose
         :param game_piece: a GamePiece object
     
         :return: nothing
         """
+        
         position = (-1,-1)
+        
         while self.get_value(position) != 0:
             position = (random.randint(0,3), random.randint(0,3))
 
@@ -72,6 +82,18 @@ class GameBoard:
         # print("Placing "+str(game_piece.value) + " at "+str(position))
         self.board[position[0]][position[1]] = game_piece
 
+    def _check_if_lose(self):
+        """ Checks a board to see if the player should lose by counting the number of empty GamePieces
+        :return: True if Lose, False otherwise
+        """
+        
+        for row in range(4):
+            for col in range(4):
+                if (self.get_value((row, col))==0):
+                    # if there is even a single empty square, this is not a loss
+                    return False
+        # If an empty was never found, then it's a loss
+        return True
     def _clear_board(self):
         """Clear the board to setup for a new game"""
         
