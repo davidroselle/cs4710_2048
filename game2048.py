@@ -120,13 +120,7 @@ class GameBoard:
         else:
             return self.board[coord[0]][coord[1]].value
     
-    def move(self,dir):
-        """
-        Core function of when an key is pressed
-        :citation: https://www.geeksforgeeks.org/2048-game-in-python/ \n
-        :usage: Psuedocode about how to compute a move (transpose, etc) ONLY [remove if i never end up using this]
-        """
-        
+    def _shift_pieces(self, dir):
         # First, shift everything so it is correct without doing any combinations
     
         # External is the row iterator for left/right; columns for up/down
@@ -144,14 +138,14 @@ class GameBoard:
                     
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
                     if self.get_value((reverse_index, external)) != 0:
-                        self._shift_piece(reverse_index,external, spot_to_place, external)
+                        self._shift_one_piece(reverse_index,external, spot_to_place, external)
                         spot_to_place -= 1
                 if dir == Direction.UP:
                     # Same as down just without the reverse_index
                     
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
                     if self.get_value((internal, external)) != 0:
-                        self._shift_piece(internal,external, spot_to_place, external)
+                        self._shift_one_piece(internal,external, spot_to_place, external)
                         spot_to_place += 1
                 if dir == Direction.LEFT:
                     # Same as right just without the reverse_index
@@ -159,23 +153,64 @@ class GameBoard:
                     
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
                     if self.get_value((external, internal)) != 0:
-                        self._shift_piece(external,internal, external, spot_to_place)
+                        self._shift_one_piece(external,internal, external, spot_to_place)
                         spot_to_place += 1
                 if dir == Direction.RIGHT:
                     
                     reverse_index = 3-internal
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
                     if self.get_value((external, reverse_index)) != 0:
-                        self._shift_piece(external,reverse_index, external, spot_to_place)
+                        self._shift_one_piece(external,reverse_index, external, spot_to_place)
                         spot_to_place -= 1
 
+    def _combine_pieces(self, dir):
+        # Now do the combinations since everything is shifted
+        # External is the row iterator for left/right; columns for up/down
+        for external in range(4):
+            
+            for internal in range(4):
+                # Now split based on whether down or up
+                if dir == Direction.DOWN:
+                    # Makes sense to go backwards 
+                    reverse_index = 3-internal
+                    
+                    if (reverse_index >= 1):
+                        # Now, starting from the bottom spot check if the spot above it is the same
+                        if self.get_value((reverse_index, external)) == self.get_value((reverse_index-1, external)):
+                            self._perform_combination(reverse_index, external, reverse_index-1, external, dir)
+                            
+                if dir == Direction.UP:
+                    # Same as down just without the reverse_index
+                    if (internal <= 2):
+                        # Now, starting from the bottom spot check if the spot above it is the same
+                        if self.get_value((internal, external)) == self.get_value((internal+1, external)):
+                            self._perform_combination(internal+1, external, internal, external, dir)
+                if dir == Direction.LEFT:
+                    # Same as right just without the reverse_index
+                    # note that now external is rows, while internal is columns
+                    
+                   print()
+                if dir == Direction.RIGHT:
+                    
+                    reverse_index = 3-internal
+                    print()
 
-        # TODO: Now do the combinations since it is shifted
+    def move(self,dir):
+        """
+        Core function of when an key is pressed
+        :citation: https://www.geeksforgeeks.org/2048-game-in-python/ \n
+        :usage: Psuedocode about how to compute a move (transpose, etc) ONLY [remove if i never end up using this]
+        """
+        
+        self._shift_pieces(dir)
+
+        self._combine_pieces(dir)
+       
 
         # TODO: Add new piece after shifts and combos done
         print("Moved "+str(dir))
 
-    def _shift_piece(self, row, column, new_row, new_column):
+    def _shift_one_piece(self, row, column, new_row, new_column):
         """Helper function within the move function that shifts a single piece on a gameBoard in a provided direction\n
         
         :row: the current row of the gamePiece
@@ -183,8 +218,8 @@ class GameBoard:
         :new_row: the new row of the gamePiece
         :new_column: the new column of the gamePiece
         """
-        print("Intermediate move",row, column,"to",new_row,new_column)
-        # prevent unneceesary in place moves
+        # print("Intermediate move",row, column,"to",new_row,new_column)
+        # prevent unneceesary in-place moves
         if not (row == new_row and column == new_column):
             # gather the gamepiece object
             gamepiece = self.board[row][column]
@@ -193,8 +228,20 @@ class GameBoard:
 
             self.board[row][column] = GamePiece(empty=True)
         
+    def _perform_combination(self, r1, c1, r2, c2, dir):
+        """
+        Combines two gamePieces into a single. Then performs a shift to account for the combination
+        :r1: row of gamePiece 1
+        :c1: column of gamePiece 1
+        :r2: row of gamePiece 2
+        :c2: column of gamePiece 2
         
-        # self.print(smallBoard=True)
+        """
+        print("Combining", r1, c1, "with", r2,c2)
+        # Call combine on the primary piece
+        self.board[r1][c1].combine()
+        # Shift after a combination to keep it in line
+        self._shift_pieces(dir)
             
 
 
@@ -304,6 +351,9 @@ class GamePiece:
                 if rand_num < total_prob:
                     self.value = k
                     return
-            
+    
+    def combine(self):
+        """Multiplies a GamePiece's value by 2 (which happens when combines)"""
+        self.value *= 2
         
         
