@@ -21,6 +21,7 @@ class GameBoard:
             for c in range(4):
                 self.board[r][c] = GamePiece(empty=True)
 
+  
     def create_new_game(self):
         """Makes a new game following the standard convention of putting 2 blocks of value 2 or 4 on the board"""
 
@@ -201,7 +202,7 @@ class GameBoard:
                 elif dir == Direction.LEFT:
                     # Same as right just without the reverse_index
                     # note that now external is rows, while internal is columns
-                    if (external >= 1):
+                    if (external <= 2):
                         # Now, starting from the bottom spot check if the spot above it is the same
                         if self.get_value((external, internal)) == self.get_value((external,internal+1)):
                             self._perform_combination(
