@@ -128,46 +128,47 @@ class GameBoard:
         """
         
         # set the initial first spot to place based on the direction
-        if dir == Direction.DOWN or dir == Direction.RIGHT:
-            spot_to_place = 3
-        else:
-            spot_to_place = 0
+        
 
-        # iterate through each column,row
-        for column in range(4):
-            for row in range(4):
+        # External is the row iterator for left/right; columns for up/down
+        for external in range(4):
+            if dir == Direction.DOWN or dir == Direction.RIGHT:
+                spot_to_place = 3
+            else:
+                spot_to_place = 0
+            for internal in range(4):
                 # Now split based on whether down or up
                 if dir == Direction.DOWN:
                     # Makes sense to go backwards 
-                    reverse_index = 3-row
+                    reverse_index = 3-internal
                     # the placement of the initial non-empty piece found (bottom row)
                     
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
-                    if self.get_value((reverse_index, column)) != 0:
-                        self._shift_piece(reverse_index,column, spot_to_place, column)
+                    if self.get_value((reverse_index, external)) != 0:
+                        self._shift_piece(reverse_index,external, spot_to_place, external)
                         spot_to_place -= 1
                 if dir == Direction.UP:
                     # Same as down just without the reverse_index
                     
                     
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
-                    if self.get_value((row, column)) != 0:
-                        self._shift_piece(row,column, spot_to_place, column)
+                    if self.get_value((internal, external)) != 0:
+                        self._shift_piece(internal,external, spot_to_place, external)
                         spot_to_place += 1
                 if dir == Direction.LEFT:
                     # Same as right just without the reverse_index
-                    
+                    # note that now external is rows, while internal is columns
                     
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
-                    if self.get_value((row, column)) != 0:
-                        self._shift_piece(row,column, row, spot_to_place)
+                    if self.get_value((external, internal)) != 0:
+                        self._shift_piece(external,internal, external, spot_to_place)
                         spot_to_place += 1
                 if dir == Direction.RIGHT:
                     
-                    reverse_index = 3-column
+                    reverse_index = 3-internal
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
-                    if self.get_value((row, reverse_index)) != 0:
-                        self._shift_piece(row,reverse_index, row, spot_to_place)
+                    if self.get_value((external, reverse_index)) != 0:
+                        self._shift_piece(external,reverse_index, external, spot_to_place)
                         spot_to_place -= 1
                         
         print("Moved "+str(dir))
