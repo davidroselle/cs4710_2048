@@ -207,8 +207,8 @@ class GameBoard:
                         if self.get_value((external, internal)) == self.get_value((external,internal+1)):
                             self._perform_combination(
                                 external, internal,  external, internal+1, dir)
-                        else:
-                            print("Not combining",external, internal)
+                        # else:
+                            # print("Not combining",external, internal)
                 elif dir == Direction.RIGHT:
                     # Makes sense to go backwards
                     reverse_index = 3-internal
@@ -261,7 +261,7 @@ class GameBoard:
         :c2: column of gamePiece 2
 
         """
-        print("Combining", r1, c1, "with", r2, c2)
+        # print("Combining", r1, c1, "with", r2, c2)
         # Call combine on the primary piece
         self.board[r1][c1].combine()
         self.board[r2][c2].make_empty()
