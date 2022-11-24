@@ -202,11 +202,13 @@ class GameBoard:
                 elif dir == Direction.LEFT:
                     # Same as right just without the reverse_index
                     # note that now external is rows, while internal is columns
-                    if (external <= 2):
+                    if (internal <= 2):
                         # Now, starting from the bottom spot check if the spot above it is the same
                         if self.get_value((external, internal)) == self.get_value((external,internal+1)):
                             self._perform_combination(
                                 external, internal,  external, internal+1, dir)
+                        else:
+                            print("Not combining",external, internal)
                 elif dir == Direction.RIGHT:
                     # Makes sense to go backwards
                     reverse_index = 3-internal
