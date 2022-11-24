@@ -127,9 +127,8 @@ class GameBoard:
         :usage: Psuedocode about how to compute a move (transpose, etc) ONLY [remove if i never end up using this]
         """
         
-        # set the initial first spot to place based on the direction
-        
-
+        # First, shift everything so it is correct without doing any combinations
+    
         # External is the row iterator for left/right; columns for up/down
         for external in range(4):
             if dir == Direction.DOWN or dir == Direction.RIGHT:
@@ -150,7 +149,6 @@ class GameBoard:
                 if dir == Direction.UP:
                     # Same as down just without the reverse_index
                     
-                    
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
                     if self.get_value((internal, external)) != 0:
                         self._shift_piece(internal,external, spot_to_place, external)
@@ -170,7 +168,11 @@ class GameBoard:
                     if self.get_value((external, reverse_index)) != 0:
                         self._shift_piece(external,reverse_index, external, spot_to_place)
                         spot_to_place -= 1
-                        
+
+
+        # TODO: Now do the combinations since it is shifted
+
+        # TODO: Add new piece after shifts and combos done
         print("Moved "+str(dir))
 
     def _shift_piece(self, row, column, new_row, new_column):
