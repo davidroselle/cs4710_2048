@@ -121,11 +121,81 @@ class GameBoard:
             return self.board[coord[0]][coord[1]].value
     
     def move(self,dir):
-        """Core function of when an key is pressed"""
+        """
+        Core function of when an key is pressed
+        :citation: https://www.geeksforgeeks.org/2048-game-in-python/ \n
+        :usage: Psuedocode about how to compute a move (transpose, etc) ONLY [remove if i never end up using this]
+        """
+        
+        # set the initial first spot to place based on the direction
+        if dir == Direction.DOWN or dir == Direction.RIGHT:
+            spot_to_place = 3
+        else:
+            spot_to_place = 0
+
+        # iterate through each column,row
+        for column in range(4):
+            for row in range(4):
+                # Now split based on whether down or up
+                if dir == Direction.DOWN:
+                    # Makes sense to go backwards 
+                    reverse_index = 3-row
+                    # the placement of the initial non-empty piece found (bottom row)
+                    
+                    # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
+                    if self.get_value((reverse_index, column)) != 0:
+                        self._shift_piece(reverse_index,column, spot_to_place, column)
+                        spot_to_place -= 1
+                if dir == Direction.UP:
+                    # Same as down just without the reverse_index
+                    
+                    
+                    # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
+                    if self.get_value((row, column)) != 0:
+                        self._shift_piece(row,column, spot_to_place, column)
+                        spot_to_place += 1
+                if dir == Direction.LEFT:
+                    # Same as right just without the reverse_index
+                    
+                    
+                    # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
+                    if self.get_value((row, column)) != 0:
+                        self._shift_piece(row,column, row, spot_to_place)
+                        spot_to_place += 1
+                if dir == Direction.RIGHT:
+                    
+                    reverse_index = 3-column
+                    # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
+                    if self.get_value((row, reverse_index)) != 0:
+                        self._shift_piece(row,reverse_index, row, spot_to_place)
+                        spot_to_place -= 1
+                        
         print("Moved "+str(dir))
 
+    def _shift_piece(self, row, column, new_row, new_column):
+        """Helper function within the move function that shifts a single piece on a gameBoard in a provided direction\n
+        
+        :row: the current row of the gamePiece
+        :column: the current column of the gamePiece
+        :new_row: the new row of the gamePiece
+        :new_column: the new column of the gamePiece
+        """
+        print("Intermediate move",row, column,"to",new_row,new_column)
+        # prevent unneceesary in place moves
+        if not (row == new_row and column == new_column):
+            # gather the gamepiece object
+            gamepiece = self.board[row][column]
+            # put the gamepiece in the new slot 
+            self.board[new_row][new_column] = gamepiece
 
-    def print(self, smallBoard = False):
+            self.board[row][column] = GamePiece(empty=True)
+        
+        
+        # self.print(smallBoard=True)
+            
+
+
+    def print(self, smallBoard = True):
         """
         Prints the board in a human readable way
         :smallBoard: Bool that prints the board in a smaller and more efficient way if True
