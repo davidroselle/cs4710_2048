@@ -1,6 +1,7 @@
 import math
 import random
 from enum import Enum
+import ai
 
 
 class Direction(Enum):
@@ -30,10 +31,39 @@ class GameBoard:
         self._place_piece(block_1)
         block_2 = GamePiece(valueList={2: 0.7, 4: 0.3})
         self._place_piece(block_2)
-        self.begin_game()
+        
 
-    def begin_game(self):
-        """TODO: Add logic for when you lose/win to break the loop\n Use WASD keys for now"""
+    def play_as_person(self):
+        '''Play the game as a person (as opposed to the computer'''
+        self.create_new_game()
+        self.__begin_game()
+
+    def play_as_computer(self, gameAgent:ai.GenericGameAgent):
+        '''Play the game as a computer. takes in the gameAgent'''
+        self.create_new_game()
+        agent = gameAgent(self)
+        print("Initial Board")
+        self.print(smallBoard=True)
+        
+        while True:
+            if (self._check_if_lose()):
+                print("After",agent.moves,"moves, you lost")
+                print("YOU LOSE THE GAME")
+                break
+            
+            
+            
+
+            self.move(agent.compute())
+            self.print(smallBoard=True)
+            
+            if self.win_game() == True:
+                print("After",agent.moves,"moves, you won")
+                print("YOU WON THE GAME!")
+                break
+
+    def __begin_game(self):
+        """Playing game as person"""
         # printing controls for user
         print("Commands are as follows: ")
         print("'W'/'w' : Up")
@@ -225,6 +255,7 @@ class GameBoard:
         :citation: https://www.geeksforgeeks.org/2048-game-in-python/ \n
         :usage: Psuedocode about how to compute a move (transpose, etc) ONLY [remove if i never end up using this]
         """
+        """TODO: don't allow a move if it doesn't change anything"""
 
         self._shift_pieces(dir)
 
