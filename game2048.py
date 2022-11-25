@@ -40,6 +40,7 @@ class GameBoard:
 
     def play_as_computer(self, gameAgent:ai.GenericGameAgent):
         '''Play the game as a computer. takes in the gameAgent'''
+        """TODO: This is not working yet, pieces aren't moving (but they move when it's self play... weird) """
         self.create_new_game()
         agent = gameAgent(self)
         print("Initial Board")
