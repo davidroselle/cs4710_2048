@@ -460,11 +460,42 @@ class PerformanceTester:
         print("POST-RUN RESULTS")
         print("Game Agent",self.gameAgent)
         print("Iterations",self.iterations)
+        if (self.iterations == 0):
+            print("Nothing to report")
+            return
         allMoves = []
         allWins = []
         allTimes = []
+        allTimesPerMove = []
+        wins = 0
+        losses = 0
+        winMoves = []
+        lossMoves = []
+        winTimes = []
+        lossTimes = []
         for res in self.results:
             allMoves.append(res[0])
             allWins.append(res[1])
             allTimes.append(res[2])
+            if res[1]:
+                wins +=1
+                winMoves.append(res[0])
+                winTimes.append(res[2])
+            else:
+                losses +=1
+                lossMoves.append(res[0])
+                lossTimes.append(res[2])
+            allTimesPerMove.append(res[2]/res[0])
+        print("\nOVERALL STATS\n")
+        print("Total Wins",wins)
+        print("Total Losses", losses)
         print("Average Moves (Overall)", sum(allMoves)/len(allMoves))
+        print("Average Time (Overall)", sum(allTimes)/len(allTimes),"seconds")
+        print("Time per Move (Overall",sum(allTimesPerMove)/len(allTimesPerMove))
+        print("\nSEPARATED WIN/LOSS STATS\n")
+        if (losses > 0):
+            print("Average Moves (Loss)", sum(lossMoves)/len(lossMoves))
+            print("Average Time (Loss)", sum(lossTimes)/len(lossTimes))
+        if (wins > 0):
+            print("Average Moves (Loss)", sum(winMoves)/len(winMoves))
+            print("Average Time (Loss)", sum(winTimes)/len(winTimes))
