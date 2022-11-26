@@ -457,9 +457,13 @@ class PerformanceTester:
     
     def __interpretResults(self):
         """Creates a readable post-mortem of the run"""
-        print("POST-RUN RESULTS")
-        print("Game Agent",self.gameAgent)
-        print("Iterations",self.iterations)
+        topBar = "-"*len("| Game Agent "+str(self.gameAgent)+ " |")
+        print("\n"+topBar)
+        print("| POST-RUN RESULTS"+  " "*(len("| Game Agent "+str(self.gameAgent))-len("| POST-RUN RESULTS"))+"  |")
+        print("| Game Agent",self.gameAgent,' |')
+        print("| Iterations "+str(self.iterations)+  " "*(len("| Game Agent "+str(self.gameAgent))-len("| Iterations "+str(self.iterations)))+"  |")
+        print(topBar)
+
         if (self.iterations == 0):
             print("Nothing to report")
             return
@@ -489,6 +493,7 @@ class PerformanceTester:
         print("\nOVERALL STATS\n")
         print("Total Wins",wins)
         print("Total Losses", losses)
+        print("Total Run Time", sum(allTimes))
         print("Average Moves (Overall)", sum(allMoves)/len(allMoves))
         print("Average Time (Overall)", sum(allTimes)/len(allTimes),"seconds")
         print("Time per Move (Overall",sum(allTimesPerMove)/len(allTimesPerMove))
