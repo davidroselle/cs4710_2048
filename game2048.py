@@ -12,8 +12,10 @@ class Direction(Enum):
 
 
 class GameBoard:
-    def __init__(self):
-        """Creates an empty game board"""
+    def __init__(self, graphics=False):
+        """Creates an empty game board
+        :graphics: boolean on whether to show graphics of each step. Turned on for non-AI play but off by default
+        """
         # First fill it with None's
         self.board = [[None, None, None, None], [None, None, None, None], [
             None, None, None, None], [None, None, None, None]]  # 4x4 List of GamePiece objects
@@ -21,6 +23,7 @@ class GameBoard:
         for r in range(4):
             for c in range(4):
                 self.board[r][c] = GamePiece(empty=True)
+        self.graphics = graphics
 
   
     def create_new_game(self):
@@ -35,6 +38,7 @@ class GameBoard:
 
     def play_as_person(self):
         '''Play the game as a person (as opposed to the computer'''
+        graphics = True
         self.create_new_game()
         self.__begin_game()
 
@@ -43,13 +47,15 @@ class GameBoard:
         """TODO: This is not working yet, pieces aren't moving (but they move when it's self play... weird) """
         self.create_new_game()
         agent = gameAgent(self)
-        print("Initial Board")
+        if (self.graphics):
+            print("Initial Board")
         self.print(smallBoard=True)
         
         while True:
             if (self._check_if_lose()):
-                print("After",agent.moves,"moves, you lost")
-                print("YOU LOSE THE GAME")
+                if (self.graphics):
+                    print("After",agent.moves,"moves, you lost")
+                    print("YOU LOSE THE GAME")
                 break
             
             
@@ -59,8 +65,9 @@ class GameBoard:
             self.print(smallBoard=True)
             
             if self.win_game() == True:
-                print("After",agent.moves,"moves, you won")
-                print("YOU WON THE GAME!")
+                if (self.graphics):
+                    print("After",agent.moves,"moves, you won")
+                    print("YOU WON THE GAME!")
                 break
 
     def __begin_game(self):
@@ -162,12 +169,14 @@ class GameBoard:
         # First, shift everything so it is correct without doing any combinations
 
         # External is the row iterator for left/right; columns for up/down
+        
         for external in range(4):
             if dir == Direction.DOWN or dir == Direction.RIGHT:
                 spot_to_place = 3
             else:
                 spot_to_place = 0
             for internal in range(4):
+               
                 # Now split based on whether down or up
                 if dir == Direction.DOWN:
                     # Makes sense to go backwards
@@ -179,7 +188,7 @@ class GameBoard:
                         self._shift_one_piece(
                             reverse_index, external, spot_to_place, external)
                         spot_to_place -= 1
-                if dir == Direction.UP:
+                elif dir == Direction.UP:
                     # Same as down just without the reverse_index
 
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
@@ -187,7 +196,7 @@ class GameBoard:
                         self._shift_one_piece(
                             internal, external, spot_to_place, external)
                         spot_to_place += 1
-                if dir == Direction.LEFT:
+                elif dir == Direction.LEFT:
                     # Same as right just without the reverse_index
                     # note that now external is rows, while internal is columns
 
@@ -196,14 +205,16 @@ class GameBoard:
                         self._shift_one_piece(
                             external, internal, external, spot_to_place)
                         spot_to_place += 1
-                if dir == Direction.RIGHT:
-
+                elif dir == Direction.RIGHT:
+                    
                     reverse_index = 3-internal
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
                     if self.get_value((external, reverse_index)) != 0:
                         self._shift_one_piece(
                             external, reverse_index, external, spot_to_place)
                         spot_to_place -= 1
+                else:
+                    print("No matches for Dir...", dir)
 
     def _combine_pieces(self, dir):
         """ Called by move to combine adjacent pieces """
@@ -253,12 +264,13 @@ class GameBoard:
     def move(self, dir):
         """
         Core function of when an key is pressed
-        :citation: https://www.geeksforgeeks.org/2048-game-in-python/ \n
-        :usage: Psuedocode about how to compute a move (transpose, etc) ONLY [remove if i never end up using this]
+        
         """
         """TODO: don't allow a move if it doesn't change anything"""
-
+        
         self._shift_pieces(dir)
+        
+       
 
         self._combine_pieces(dir)
 
@@ -306,57 +318,57 @@ class GameBoard:
         :smallBoard: Bool that prints the board in a smaller and more efficient way if True
         :return: Nothing
         """
+        if (self.graphics):
+            # create a table of all needed strings
+            # ts is a list of table strings
+            ts = [[" ", " ", " ", " "], [" ", " ", " ", " "],
+                [" ", " ", " ", " "], [" ", " ", " ", " "]]
+            for r in range(4):
+                for c in range(4):
+                    if self.get_value((r, c)) != 0:
+                        ts[r][c] = str(self.get_value((r, c)))
+            # This thing is a monster because of string interpolation
 
-        # create a table of all needed strings
-        # ts is a list of table strings
-        ts = [[" ", " ", " ", " "], [" ", " ", " ", " "],
-              [" ", " ", " ", " "], [" ", " ", " ", " "]]
-        for r in range(4):
-            for c in range(4):
-                if self.get_value((r, c)) != 0:
-                    ts[r][c] = str(self.get_value((r, c)))
-        # This thing is a monster because of string interpolation
+            if smallBoard:
+                printed_board = f"""
+                -----------------
+                | {ts[0][0]} | {ts[0][1]} | {ts[0][2]} | {ts[0][3]} |
+                -----------------
+                | {ts[1][0]} | {ts[1][1]} | {ts[1][2]} | {ts[1][3]} |
+                -----------------
+                | {ts[2][0]} | {ts[2][1]} | {ts[2][2]} | {ts[2][3]} |
+                -----------------
+                | {ts[3][0]} | {ts[3][1]} | {ts[3][2]} | {ts[3][3]} |
+                -----------------
+                """
 
-        if smallBoard:
-            printed_board = f"""
-            -----------------
-            | {ts[0][0]} | {ts[0][1]} | {ts[0][2]} | {ts[0][3]} |
-            -----------------
-            | {ts[1][0]} | {ts[1][1]} | {ts[1][2]} | {ts[1][3]} |
-            -----------------
-            | {ts[2][0]} | {ts[2][1]} | {ts[2][2]} | {ts[2][3]} |
-            -----------------
-            | {ts[3][0]} | {ts[3][1]} | {ts[3][2]} | {ts[3][3]} |
-            -----------------
+            else:
+                printed_board = f"""
+                ------------------------------------------------                     
+                |{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}|{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}|{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}|{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}|
+                |{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}|{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}|{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}|{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}|
+                |{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}|{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}|{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}|{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}|
+                |{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}|{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}|{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}|{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}|
+                ------------------------------------------------
+                |{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}|{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}|{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}|{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}|
+                |{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}|{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}|{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}|{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}|
+                |{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}|{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}|{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}|{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}|
+                |{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}|{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}|{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}|{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}|
+                ------------------------------------------------
+                |{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}|{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}|{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}|{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}|
+                |{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}|{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}|{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}|{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}|
+                |{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}|{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}|{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}|{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}|
+                |{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}|{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}|{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}|{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}|
+                ------------------------------------------------
+                |{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}|{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}|{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}|{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}|
+                |{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}|{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}|{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}|{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}|
+                |{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}|{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}|{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}|{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}|
+                |{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}|{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}|{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}|{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}|
+                ------------------------------------------------
+                
             """
-
-        else:
-            printed_board = f"""
-            ------------------------------------------------                     
-            |{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}|{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}|{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}|{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}|
-            |{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}|{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}|{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}|{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}|
-            |{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}|{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}|{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}|{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}|
-            |{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}{ts[0][0]}|{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}{ts[0][1]}|{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}{ts[0][2]}|{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}{ts[0][3]}|
-            ------------------------------------------------
-            |{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}|{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}|{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}|{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}|
-            |{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}|{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}|{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}|{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}|
-            |{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}|{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}|{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}|{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}|
-            |{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}{ts[1][0]}|{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}{ts[1][1]}|{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}{ts[1][2]}|{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}{ts[1][3]}|
-            ------------------------------------------------
-            |{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}|{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}|{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}|{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}|
-            |{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}|{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}|{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}|{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}|
-            |{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}|{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}|{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}|{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}|
-            |{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}{ts[2][0]}|{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}{ts[2][1]}|{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}{ts[2][2]}|{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}{ts[2][3]}|
-            ------------------------------------------------
-            |{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}|{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}|{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}|{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}|
-            |{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}|{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}|{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}|{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}|
-            |{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}|{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}|{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}|{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}|
-            |{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}{ts[3][0]}|{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}{ts[3][1]}|{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}{ts[3][2]}|{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}{ts[3][3]}|
-            ------------------------------------------------
-            
-        """
-        # self.__single_print_block()
-        print(printed_board)
+            # self.__single_print_block()
+            print(printed_board)
 
 
 class GamePiece:
@@ -411,3 +423,22 @@ class GamePiece:
 
     def make_empty(self):
         self.value = 0
+
+class PerformanceTester:
+    """Class that runs the AI multiple times and outputs the results
+    :gameAgent: Game Agent (AI) to run
+    :iterations: the number of times to run the program
+    :graphics: whether to output the graphics of each game (not reccomended unless iterations below 5)
+    """
+    def __init__(self, gameAgent : ai.GenericGameAgent, iterations=100, graphics=False):
+        self.gameAgent = gameAgent
+        self.iterations = iterations
+        self.graphics = graphics
+
+    def runIterations(self):
+        print("Running the game", self.iterations, "times")
+        for i in range(self.iterations):
+            board = GameBoard(graphics=self.graphics)
+            board.create_new_game()
+            board.play_as_computer(gameAgent=self.gameAgent)
+        print("Execution Complete")
