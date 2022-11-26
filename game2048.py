@@ -1,6 +1,7 @@
 import math
 import random
 from enum import Enum
+import time
 import ai
 
 
@@ -43,8 +44,10 @@ class GameBoard:
         self.__begin_game()
 
     def play_as_computer(self, gameAgent:ai.GenericGameAgent):
-        '''Play the game as a computer. takes in the gameAgent'''
-        """TODO: This is not working yet, pieces aren't moving (but they move when it's self play... weird) """
+        '''Play the game as a computer. takes in the gameAgent
+        :return: [moves:int, win:bool, time:double]
+        '''
+        startTime = time.perf_counter()
         self.create_new_game()
         agent = gameAgent(self)
         if (self.graphics):
@@ -56,6 +59,8 @@ class GameBoard:
                 if (self.graphics):
                     print("After",agent.moves,"moves, you lost")
                     print("YOU LOSE THE GAME")
+                endTime = time.perf_counter()
+                return [agent.moves, False, endTime-startTime]
                 break
             
             
@@ -68,6 +73,8 @@ class GameBoard:
                 if (self.graphics):
                     print("After",agent.moves,"moves, you won")
                     print("YOU WON THE GAME!")
+                endTime = time.perf_counter()
+                return [agent.moves, True, endTime-startTime]
                 break
 
     def __begin_game(self):
@@ -276,7 +283,8 @@ class GameBoard:
 
         new_piece = GamePiece(valueList={2: 0.7, 4: 0.3})
         self._place_piece(new_piece)
-        print("Moved "+str(dir))
+        if (self.graphics):
+            print("Moved "+str(dir))
 
     def _shift_one_piece(self, row, column, new_row, new_column):
         """Helper function within the move function that shifts a single piece on a gameBoard in a provided direction\n
@@ -434,11 +442,29 @@ class PerformanceTester:
         self.gameAgent = gameAgent
         self.iterations = iterations
         self.graphics = graphics
+        self.results = []
+        self.runIterations()
 
     def runIterations(self):
-        print("Running the game", self.iterations, "times")
+        # print("Running the game", self.iterations, "times")
         for i in range(self.iterations):
             board = GameBoard(graphics=self.graphics)
             board.create_new_game()
-            board.play_as_computer(gameAgent=self.gameAgent)
-        print("Execution Complete")
+            result = board.play_as_computer(gameAgent=self.gameAgent)
+            self.results.append(result)
+        # print("Execution Complete")
+        self.__interpretResults()
+    
+    def __interpretResults(self):
+        """Creates a readable post-mortem of the run"""
+        print("POST-RUN RESULTS")
+        print("Game Agent",self.gameAgent)
+        print("Iterations",self.iterations)
+        allMoves = []
+        allWins = []
+        allTimes = []
+        for res in self.results:
+            allMoves.append(res[0])
+            allWins.append(res[1])
+            allTimes.append(res[2])
+        print("Average Moves (Overall)", sum(allMoves)/len(allMoves))

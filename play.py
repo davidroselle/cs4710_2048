@@ -1,4 +1,4 @@
-from game2048 import GameBoard
+from game2048 import GameBoard, PerformanceTester
 import sys
 import argparse
 import ai
@@ -9,6 +9,8 @@ Main Program To Play The Game
 parser = argparse.ArgumentParser(description = "This program runs 2048 with given settings")
 parser.add_argument("-player", help = "self = you play; computer = computer plays [default]")
 parser.add_argument("-agent", help = "self = you play; computer = computer plays")
+parser.add_argument("-iter", help = "number of AI iterations")
+parser.add_argument("-graphics", help = "whether to show graphics (AI Only). Any argument is True, default is False")
 # parser.add_argument("-outSize", help = "small = small output, large = large output. Default: small")
 args = parser.parse_args()
 
@@ -36,13 +38,18 @@ elif args.player == 'computer' or args.player == None:
             print("Current options are:")
             print(gameAgentDict)
         else:
-            board = GameBoard()
-            board.create_new_game()
+            if (args.iter != None):
+                if (args.graphics != None):
+                    runner = PerformanceTester(gameAgentDict[args.agent], iterations=int(args.iter),graphics=bool(args.graphics))
+                else:   
+                    runner = PerformanceTester(gameAgentDict[args.agent], iterations=int(args.iter))
+            else:
+                if (args.graphics != None):
+                    runner = PerformanceTester(gameAgentDict[args.agent],graphics=bool(args.graphics))
+                else:
+                    runner = PerformanceTester(gameAgentDict[args.agent])
+
             
-
-            # END prints
-
-            board.play_as_computer(gameAgentDict[args.agent])
     else:
         print("You must pick a Game Agent using argument '-agent'")
 else:
