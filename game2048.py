@@ -457,11 +457,11 @@ class PerformanceTester:
     
     def __interpretResults(self):
         """Creates a readable post-mortem of the run"""
-        topBar = "-"*len("| Game Agent "+str(self.gameAgent)+ " |")
+        topBar = "-"*len("| Game Agent "+str(self.gameAgent)+ "|")
         print("\n"+topBar)
-        print("| POST-RUN RESULTS"+  " "*(len("| Game Agent "+str(self.gameAgent))-len("| POST-RUN RESULTS"))+"  |")
-        print("| Game Agent",self.gameAgent,' |')
-        print("| Iterations "+str(self.iterations)+  " "*(len("| Game Agent "+str(self.gameAgent))-len("| Iterations "+str(self.iterations)))+"  |")
+        print("| POST-RUN RESULTS"+  " "*(len("| Game Agent "+str(self.gameAgent))-len("| POST-RUN RESULTS"))+" |")
+        print("| Game Agent",self.gameAgent,'|')
+        print("| Iterations "+str(self.iterations)+  " "*(len("| Game Agent "+str(self.gameAgent))-len("| Iterations "+str(self.iterations)))+" |")
         print(topBar)
 
         if (self.iterations == 0):
@@ -493,14 +493,15 @@ class PerformanceTester:
         print("\nOVERALL STATS\n")
         print("Total Wins",wins)
         print("Total Losses", losses)
-        print("Total Run Time", sum(allTimes))
+        print("Total Run Time", sum(allTimes),"seconds")
         print("Average Moves (Overall)", sum(allMoves)/len(allMoves))
         print("Average Time (Overall)", sum(allTimes)/len(allTimes),"seconds")
-        print("Time per Move (Overall",sum(allTimesPerMove)/len(allTimesPerMove))
+        print("Time per Move (Overall",'{0:.10f}'.format(sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
         print("\nSEPARATED WIN/LOSS STATS\n")
         if (losses > 0):
             print("Average Moves (Loss)", sum(lossMoves)/len(lossMoves))
-            print("Average Time (Loss)", sum(lossTimes)/len(lossTimes))
+            print("Average Time (Loss)", sum(lossTimes)/len(lossTimes),"seconds")
         if (wins > 0):
             print("Average Moves (Loss)", sum(winMoves)/len(winMoves))
-            print("Average Time (Loss)", sum(winTimes)/len(winTimes))
+            print("Average Time (Loss)", sum(winTimes)/len(winTimes),"seconds")
+        print("\n")
