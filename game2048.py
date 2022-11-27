@@ -85,7 +85,7 @@ class GameBoard:
         print("'S'/'s' : Down")
         print("'A'/'a' : Left")
         print("'D'/'d' : Right")
-        print("'W'/'w' : Quit game")
+        print("'Q'/'q' : Quit game")
 
         print("Initial Board")
         self.print(smallBoard=True)
