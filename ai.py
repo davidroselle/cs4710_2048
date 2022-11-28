@@ -74,9 +74,10 @@ class MinimaxAgent(GenericGameAgent):
     def compute(self):
         '''Returns the move that should be done by the agent'''
         self.moves += 1
-        bestMove = None
+        bestMove = game2048.Direction.DOWN
         maxScore = 0
         for nextMove in game2048.Direction:
+            #print(nextMove)
             score = self.calculateScore(self.gameBoard, nextMove)
             if score > maxScore:
                 maxScore = score
@@ -84,9 +85,11 @@ class MinimaxAgent(GenericGameAgent):
         return bestMove
 
     def calculateScore(self, board, move):
-        newBoard = board.simulate_move(board, move) # TODO: Need simulate_move function
+        newBoard = board.simulate_move(move) # TODO: Need simulate_move function
         if newBoard == board:
+            #print("newboard is the same")
             return 0
+        #print("newboard is not the same")
         return self.generateScore(newBoard, 0, 3)
 
     def generateScore(self, board, depth, depthLimit):
@@ -99,11 +102,11 @@ class MinimaxAgent(GenericGameAgent):
             for c in range(4):
                 if board[r][c] == game2048.GamePiece(empty=True):
                     newBoard2 = board
-                    newBoard2[r][c] = 2
+                    newBoard2[r][c].value = 2
                     moveScore2 = self.calculateMoveScore(newBoard2, depth, depthLimit)
                     total += (0.7*moveScore2) #proba based on whether new_piece is 2 or 4.
                     newBoard4 = board
-                    newBoard4[r][c] = 4
+                    newBoard4[r][c].value = 4
                     moveScore4 = self.calculateMoveScore(newBoard4, depth, depthLimit)
                     total += (0.3*moveScore4)
         return total
@@ -111,7 +114,7 @@ class MinimaxAgent(GenericGameAgent):
     def calculateMoveScore(self, board, depth, depthLimit):
         maxScore = 0
         for move in game2048.Direction:
-            newBoard = board.simulate_move(board, move)  # TODO: Need simulate_move function
+            newBoard = board.simulate_move(move)  # TODO: Need simulate_move function
             score = 0
             if newBoard != board:
                 score += self.generateScore(newBoard, depth + 1, depthLimit)
