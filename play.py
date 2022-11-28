@@ -22,7 +22,8 @@ args = parser.parse_args()
 # Dictionary of the Game Agents
 gameAgentDict = {
     "DownRightGameAgent":ai.DownRightGameAgent,
-    "RandomGameAgent":ai.RandomGameAgent
+    "RandomGameAgent":ai.RandomGameAgent,
+    "MinimaxAgent":ai.MinimaxAgent
     }
 
 if args.player == 'self' :

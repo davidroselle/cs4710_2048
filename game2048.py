@@ -222,6 +222,7 @@ class GameBoard:
                         spot_to_place -= 1
                 else:
                     print("No matches for Dir...", dir)
+                    exit()
 
     def _combine_pieces(self, dir):
         """ Called by move to combine adjacent pieces """
@@ -277,7 +278,7 @@ class GameBoard:
         
         self._shift_pieces(dir)
         
-       
+
 
         self._combine_pieces(dir)
 
