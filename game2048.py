@@ -287,6 +287,20 @@ class GameBoard:
         if (self.graphics):
             print("Moved "+str(dir))
 
+    def simulate_move(self, board, dir):
+        """
+        simulates the given move and returns board.
+
+        """
+        """TODO: don't allow a move if it doesn't change anything"""
+
+        board._shift_pieces(dir)
+
+        board._combine_pieces(dir)
+
+        return board
+
+
     def _shift_one_piece(self, row, column, new_row, new_column):
         """Helper function within the move function that shifts a single piece on a gameBoard in a provided direction\n
 
