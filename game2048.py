@@ -291,6 +291,7 @@ class GameBoard:
             print("Moved "+str(dir))
 
 
+
     def _shift_one_piece(self, row, column, new_row, new_column):
         """Helper function within the move function that shifts a single piece on a gameBoard in a provided direction\n
 

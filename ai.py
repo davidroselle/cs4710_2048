@@ -84,7 +84,7 @@ class MinimaxAgent(GenericGameAgent):
                 # print("initial board : " + "\n")
                 # game2048.print_new_board(initial)
             score = self.calculateScore(initial, nextMove)
-            if score > maxScore:
+            if score >= maxScore:
                 maxScore = score
                 bestMove = nextMove
         return bestMove
@@ -141,6 +141,8 @@ class MinimaxAgent(GenericGameAgent):
         empty : number of empty GamePiece in board
         totalValue : values of individual GamePiece
 
+        from research: smoothness and monotonicity
+
         '''
         empty = 0
         totalValue = 0
@@ -151,7 +153,7 @@ class MinimaxAgent(GenericGameAgent):
                 else:
                     totalValue += board.get_value((r,c))
 
-        score = 0.7*empty + 0.3*totalValue
+        score = 0.5*empty + 0.5*totalValue
         return score
 
 
