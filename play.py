@@ -23,6 +23,7 @@ args = parser.parse_args()
 gameAgentDict = {
     "DownRightGameAgent":ai.DownRightGameAgent,
     "RandomGameAgent":ai.RandomGameAgent,
+    "GreedyAgent": ai.GreedyAgent,
     "MinimaxAgent":ai.MinimaxAgent
     }
 

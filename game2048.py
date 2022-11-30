@@ -502,7 +502,7 @@ class PerformanceTester:
         print("Total Run Time", sum(allTimes),"seconds")
         print("Average Moves (Overall)", sum(allMoves)/len(allMoves))
         print("Average Time (Overall)", sum(allTimes)/len(allTimes),"seconds")
-        print("Time per Move (Overall",'{0:.10f}'.format(sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
+        print("Time per Move (Overall)",'{0:.10f}'.format(sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
         print("\nSEPARATED WIN/LOSS STATS\n")
         if (losses > 0):
             print("Average Moves (Loss)", sum(lossMoves)/len(lossMoves))
