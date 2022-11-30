@@ -77,6 +77,16 @@ class GameBoard:
                 return [agent.moves, True, endTime-startTime]
                 break
 
+    def check_if_move_legal(self, move):
+        """Checks if a given move is even possible/allowed"""
+        if (move == Direction.DOWN):
+            for col in range(4):
+                # This isn't super elegant, but basically
+                pass
+
+
+
+
     def __begin_game(self):
         """Playing game as person"""
         # printing controls for user
