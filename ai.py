@@ -2,8 +2,7 @@
 
 from enum import Enum
 import random
-import game2048 
-import math
+import game2048
 
 
 
