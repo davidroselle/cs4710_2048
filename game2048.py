@@ -81,8 +81,59 @@ class GameBoard:
         """Checks if a given move is even possible/allowed"""
         if (move == Direction.DOWN):
             for col in range(4):
-                # This isn't super elegant, but basically
-                pass
+                # This isn't super elegant, but basically checks for a space to move down to below a tile
+                has_space_below = False
+                for row in range(4):
+
+                    if self.get_value((row, col)) != 0:
+                        has_space_below = True
+                    else:
+                        # only evaluates if the space is empty
+                        if has_space_below:
+                            # if you hit an empty spot AND there is a tile above it (as there must be because has_space_below is True)... return True
+                            return True
+        elif (move == Direction.UP):
+            for col in range(4):
+                # This isn't super elegant, but basically checks for a space to move down to below a tile
+                has_space_below = False
+                for row in [3,2,1,0]:
+                    # like down except checks the other way
+                    if self.get_value((row, col)) != 0:
+                        has_space_above = True
+                    else:
+                        # only evaluates if the space is empty
+                        if has_space_above:
+                            # if you hit an empty spot AND there is a tile above it (as there must be because has_space_below is True)... return True
+                            return True
+        elif (move == Direction.RIGHT):
+            for row in range(4):
+                # This isn't super elegant, but basically checks for a space to move down to below a tile
+                has_space_below = False
+                for col in range(4):
+                    # like down except checks the other way
+                    if self.get_value((row, col)) != 0:
+                        has_space_right = True
+                    else:
+                        # only evaluates if the space is empty
+                        if has_space_right:
+                            # if you hit an empty spot AND there is a tile above it (as there must be because has_space_below is True)... return True
+                            return True
+        elif (move == Direction.LEFT):
+            for row in range(4):
+                # This isn't super elegant, but basically checks for a space to move down to below a tile
+                has_space_below = False
+                for col in [3,2,1,0]:
+                    # like down except checks the other way
+                    if self.get_value((row, col)) != 0:
+                        has_space_left = True
+                    else:
+                        # only evaluates if the space is empty
+                        if has_space_left:
+                            # if you hit an empty spot AND there is a tile above it (as there must be because has_space_below is True)... return True
+                            return True
+        print("Illegal Move Detected!")
+        return False
+
 
 
 
