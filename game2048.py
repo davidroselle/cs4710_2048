@@ -3,6 +3,7 @@ import random
 from enum import Enum
 import time
 import ai
+import game2048
 
 
 class Direction(Enum):
@@ -24,6 +25,7 @@ class GameBoard:
         for r in range(4):
             for c in range(4):
                 self.board[r][c] = GamePiece(empty=True)
+                self.board[r][c].value = 0
         self.graphics = graphics
 
   
@@ -256,6 +258,9 @@ class GameBoard:
         else:
             return self.board[coord[0]][coord[1]].value
 
+    def set_value(self, coord, newValue):
+        self.board[coord[0]][coord[1]].value = newValue
+
     def _shift_pieces(self, dir):
         """Called by move to shift the pieces (no combination)"""
         # First, shift everything so it is correct without doing any combinations
@@ -307,6 +312,7 @@ class GameBoard:
                         spot_to_place -= 1
                 else:
                     print("No matches for Dir...", dir)
+                    exit()
 
     def _combine_pieces(self, dir):
         """ Called by move to combine adjacent pieces """
@@ -364,8 +370,6 @@ class GameBoard:
         #     return
 
         self._shift_pieces(dir)
-        
-       
 
         self._combine_pieces(dir)
 
@@ -373,6 +377,8 @@ class GameBoard:
         self._place_piece(new_piece)
         if (self.graphics):
             print("Moved "+str(dir))
+
+
 
     def _shift_one_piece(self, row, column, new_row, new_column):
         """Helper function within the move function that shifts a single piece on a gameBoard in a provided direction\n
@@ -587,7 +593,7 @@ class PerformanceTester:
         print("Total Run Time", sum(allTimes),"seconds")
         print("Average Moves (Overall)", sum(allMoves)/len(allMoves))
         print("Average Time (Overall)", sum(allTimes)/len(allTimes),"seconds")
-        print("Time per Move (Overall",'{0:.10f}'.format(sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
+        print("Time per Move (Overall)",'{0:.10f}'.format(sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
         print("\nSEPARATED WIN/LOSS STATS\n")
         if (losses > 0):
             print("Average Moves (Loss)", sum(lossMoves)/len(lossMoves))
@@ -596,3 +602,50 @@ class PerformanceTester:
             print("Average Moves (Loss)", sum(winMoves)/len(winMoves))
             print("Average Time (Loss)", sum(winTimes)/len(winTimes),"seconds")
         print("\n")
+
+
+def check_boards(b1, b2):
+    ''' check if two boards are the same '''
+    for r in range(4):
+        for c in range(4):
+            if b1.get_value((r,c)) != b2.get_value((r,c)):
+                    return False
+    return True
+
+
+def simulate_move(board : GameBoard, dir):
+    """
+    simulates the given move and returns board.
+
+    """
+    """TODO: don't allow a move if it doesn't change anything"""
+
+    newBoard = board
+
+    newBoard._shift_pieces(dir)
+
+    newBoard._combine_pieces(dir)
+
+    return newBoard
+
+def print_new_board(board):
+    ts = [[" ", " ", " ", " "], [" ", " ", " ", " "],
+              [" ", " ", " ", " "], [" ", " ", " ", " "]]
+    for r in range(4):
+        for c in range(4):
+            if board.get_value((r, c)) != 0:
+                ts[r][c] = str(board.get_value((r, c)))
+
+    printed_board = f"""
+    -----------------
+    | {ts[0][0]} | {ts[0][1]} | {ts[0][2]} | {ts[0][3]} |
+    -----------------
+    | {ts[1][0]} | {ts[1][1]} | {ts[1][2]} | {ts[1][3]} |
+    -----------------
+    | {ts[2][0]} | {ts[2][1]} | {ts[2][2]} | {ts[2][3]} |
+    -----------------
+    | {ts[3][0]} | {ts[3][1]} | {ts[3][2]} | {ts[3][3]} |
+    -----------------
+    """
+
+    print(printed_board)

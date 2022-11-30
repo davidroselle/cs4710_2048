@@ -22,7 +22,9 @@ args = parser.parse_args()
 # Dictionary of the Game Agents
 gameAgentDict = {
     "DownRightGameAgent":ai.DownRightGameAgent,
-    "RandomGameAgent":ai.RandomGameAgent
+    "RandomGameAgent":ai.RandomGameAgent,
+    "GreedyAgent": ai.GreedyAgent,
+    "MinimaxAgent":ai.MinimaxAgent
     }
 
 if args.player == 'self' :
@@ -36,7 +38,8 @@ elif args.player == 'computer' or args.player == None:
         if (args.agent not in gameAgentDict.keys()):
             print("Game Agent not in gameAgentDict. Be sure to add it!")
             print("Current options are:")
-            print(gameAgentDict)
+            for key in gameAgentDict.keys():
+                print(key)
         else:
             if (args.iter != None):
                 if (args.graphics != None):
