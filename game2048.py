@@ -39,7 +39,7 @@ class GameBoard:
 
     def play_as_person(self):
         '''Play the game as a person (as opposed to the computer'''
-        graphics = True
+        self.graphics = True
         self.create_new_game()
         self.__begin_game()
 
@@ -79,14 +79,20 @@ class GameBoard:
 
     def check_if_move_legal(self, move):
         """Checks if a given move is even possible/allowed"""
+        
         if (move == Direction.DOWN):
             for col in range(4):
                 # This isn't super elegant, but basically checks for a space to move down to below a tile
                 has_space_below = False
+                # Also check if two identical pieces are netx to each other (allowing a move)
+                previous_piece = None
                 for row in range(4):
-
+                    pieceVal = self.get_value((row, col))
                     if self.get_value((row, col)) != 0:
                         has_space_below = True
+                        if previous_piece == pieceVal:
+                            return True
+                        previous_piece = pieceVal
                     else:
                         # only evaluates if the space is empty
                         if has_space_below:
@@ -95,11 +101,17 @@ class GameBoard:
         elif (move == Direction.UP):
             for col in range(4):
                 # This isn't super elegant, but basically checks for a space to move down to below a tile
-                has_space_below = False
+                has_space_above = False
+                # Also check if two identical pieces are netx to each other (allowing a move)
+                previous_piece = None
                 for row in [3,2,1,0]:
                     # like down except checks the other way
+                    pieceVal = self.get_value((row, col))
                     if self.get_value((row, col)) != 0:
                         has_space_above = True
+                        if previous_piece == pieceVal:
+                            return True
+                        previous_piece = pieceVal
                     else:
                         # only evaluates if the space is empty
                         if has_space_above:
@@ -108,11 +120,17 @@ class GameBoard:
         elif (move == Direction.RIGHT):
             for row in range(4):
                 # This isn't super elegant, but basically checks for a space to move down to below a tile
-                has_space_below = False
+                has_space_right = False
+                # Also check if two identical pieces are netx to each other (allowing a move)
+                previous_piece = None
                 for col in range(4):
+                    pieceVal = self.get_value((row, col))
                     # like down except checks the other way
                     if self.get_value((row, col)) != 0:
                         has_space_right = True
+                        if previous_piece == pieceVal:
+                            return True
+                        previous_piece = pieceVal
                     else:
                         # only evaluates if the space is empty
                         if has_space_right:
@@ -121,17 +139,23 @@ class GameBoard:
         elif (move == Direction.LEFT):
             for row in range(4):
                 # This isn't super elegant, but basically checks for a space to move down to below a tile
-                has_space_below = False
+                has_space_left = False
+                # Also check if two identical pieces are netx to each other (allowing a move)
+                previous_piece = None
                 for col in [3,2,1,0]:
+                    pieceVal = self.get_value((row, col))
                     # like down except checks the other way
                     if self.get_value((row, col)) != 0:
                         has_space_left = True
+                        if previous_piece == pieceVal:
+                            return True
+                        previous_piece = pieceVal
                     else:
                         # only evaluates if the space is empty
                         if has_space_left:
                             # if you hit an empty spot AND there is a tile above it (as there must be because has_space_below is True)... return True
                             return True
-        print("Illegal Move Detected!")
+        # print("Illegal Move Detected!")
         return False
 
 
@@ -334,8 +358,11 @@ class GameBoard:
         Core function of when an key is pressed
         
         """
-        """TODO: don't allow a move if it doesn't change anything"""
-        
+        if dir == None:
+            return
+        # if not self.check_if_move_legal(dir):
+        #     return
+
         self._shift_pieces(dir)
         
        
@@ -513,6 +540,9 @@ class PerformanceTester:
             board.create_new_game()
             result = board.play_as_computer(gameAgent=self.gameAgent)
             self.results.append(result)
+            
+            print("Progress: "+str(i)+"/"+str(self.iterations))
+            
         # print("Execution Complete")
         self.__interpretResults()
     

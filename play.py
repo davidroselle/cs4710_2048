@@ -8,7 +8,7 @@ Main Program To Play The Game
 
 parser = argparse.ArgumentParser(description = "This program runs 2048 with given settings")
 parser.add_argument("-player", help = "self = you play; computer = computer plays [default]")
-parser.add_argument("-agent", help = "self = you play; computer = computer plays")
+parser.add_argument("-agent", help = "which agent to use (see list)")
 parser.add_argument("-iter", help = "number of AI iterations")
 parser.add_argument("-graphics", help = "whether to show graphics (AI Only). Any argument is True, default is False")
 # parser.add_argument("-outSize", help = "small = small output, large = large output. Default: small")
