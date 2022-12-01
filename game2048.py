@@ -3,6 +3,7 @@ import random
 from enum import Enum
 import time
 import ai
+import game2048
 
 
 class Direction(Enum):
@@ -24,6 +25,7 @@ class GameBoard:
         for r in range(4):
             for c in range(4):
                 self.board[r][c] = GamePiece(empty=True)
+                self.board[r][c].value = 0
         self.graphics = graphics
 
   
@@ -39,7 +41,7 @@ class GameBoard:
 
     def play_as_person(self):
         '''Play the game as a person (as opposed to the computer'''
-        graphics = True
+        self.graphics = True
         self.create_new_game()
         self.__begin_game()
 
@@ -76,6 +78,91 @@ class GameBoard:
                 endTime = time.perf_counter()
                 return [agent.moves, True, endTime-startTime]
                 break
+
+    def check_if_move_legal(self, move):
+        """Checks if a given move is even possible/allowed"""
+        
+        if (move == Direction.DOWN):
+            for col in range(4):
+                # This isn't super elegant, but basically checks for a space to move down to below a tile
+                has_space_below = False
+                # Also check if two identical pieces are netx to each other (allowing a move)
+                previous_piece = None
+                for row in range(4):
+                    pieceVal = self.get_value((row, col))
+                    if self.get_value((row, col)) != 0:
+                        has_space_below = True
+                        if previous_piece == pieceVal:
+                            return True
+                        previous_piece = pieceVal
+                    else:
+                        # only evaluates if the space is empty
+                        if has_space_below:
+                            # if you hit an empty spot AND there is a tile above it (as there must be because has_space_below is True)... return True
+                            return True
+        elif (move == Direction.UP):
+            for col in range(4):
+                # This isn't super elegant, but basically checks for a space to move down to below a tile
+                has_space_above = False
+                # Also check if two identical pieces are netx to each other (allowing a move)
+                previous_piece = None
+                for row in [3,2,1,0]:
+                    # like down except checks the other way
+                    pieceVal = self.get_value((row, col))
+                    if self.get_value((row, col)) != 0:
+                        has_space_above = True
+                        if previous_piece == pieceVal:
+                            return True
+                        previous_piece = pieceVal
+                    else:
+                        # only evaluates if the space is empty
+                        if has_space_above:
+                            # if you hit an empty spot AND there is a tile above it (as there must be because has_space_below is True)... return True
+                            return True
+        elif (move == Direction.RIGHT):
+            for row in range(4):
+                # This isn't super elegant, but basically checks for a space to move down to below a tile
+                has_space_right = False
+                # Also check if two identical pieces are netx to each other (allowing a move)
+                previous_piece = None
+                for col in range(4):
+                    pieceVal = self.get_value((row, col))
+                    # like down except checks the other way
+                    if self.get_value((row, col)) != 0:
+                        has_space_right = True
+                        if previous_piece == pieceVal:
+                            return True
+                        previous_piece = pieceVal
+                    else:
+                        # only evaluates if the space is empty
+                        if has_space_right:
+                            # if you hit an empty spot AND there is a tile above it (as there must be because has_space_below is True)... return True
+                            return True
+        elif (move == Direction.LEFT):
+            for row in range(4):
+                # This isn't super elegant, but basically checks for a space to move down to below a tile
+                has_space_left = False
+                # Also check if two identical pieces are netx to each other (allowing a move)
+                previous_piece = None
+                for col in [3,2,1,0]:
+                    pieceVal = self.get_value((row, col))
+                    # like down except checks the other way
+                    if self.get_value((row, col)) != 0:
+                        has_space_left = True
+                        if previous_piece == pieceVal:
+                            return True
+                        previous_piece = pieceVal
+                    else:
+                        # only evaluates if the space is empty
+                        if has_space_left:
+                            # if you hit an empty spot AND there is a tile above it (as there must be because has_space_below is True)... return True
+                            return True
+        # print("Illegal Move Detected!")
+        return False
+
+
+
+
 
     def __begin_game(self):
         """Playing game as person"""
@@ -171,6 +258,9 @@ class GameBoard:
         else:
             return self.board[coord[0]][coord[1]].value
 
+    def set_value(self, coord, newValue):
+        self.board[coord[0]][coord[1]].value = newValue
+
     def _shift_pieces(self, dir):
         """Called by move to shift the pieces (no combination)"""
         # First, shift everything so it is correct without doing any combinations
@@ -222,6 +312,7 @@ class GameBoard:
                         spot_to_place -= 1
                 else:
                     print("No matches for Dir...", dir)
+                    exit()
 
     def _combine_pieces(self, dir):
         """ Called by move to combine adjacent pieces """
@@ -273,11 +364,12 @@ class GameBoard:
         Core function of when an key is pressed
         
         """
-        """TODO: don't allow a move if it doesn't change anything"""
-        
+        if dir == None:
+            return
+        # if not self.check_if_move_legal(dir):
+        #     return
+
         self._shift_pieces(dir)
-        
-       
 
         self._combine_pieces(dir)
 
@@ -285,6 +377,8 @@ class GameBoard:
         self._place_piece(new_piece)
         if (self.graphics):
             print("Moved "+str(dir))
+
+
 
     def _shift_one_piece(self, row, column, new_row, new_column):
         """Helper function within the move function that shifts a single piece on a gameBoard in a provided direction\n
@@ -452,6 +546,9 @@ class PerformanceTester:
             board.create_new_game()
             result = board.play_as_computer(gameAgent=self.gameAgent)
             self.results.append(result)
+            
+            print("Progress: "+str(i)+"/"+str(self.iterations))
+            
         # print("Execution Complete")
         self.__interpretResults()
     
@@ -496,7 +593,7 @@ class PerformanceTester:
         print("Total Run Time", sum(allTimes),"seconds")
         print("Average Moves (Overall)", sum(allMoves)/len(allMoves))
         print("Average Time (Overall)", sum(allTimes)/len(allTimes),"seconds")
-        print("Time per Move (Overall",'{0:.10f}'.format(sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
+        print("Time per Move (Overall)",'{0:.10f}'.format(sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
         print("\nSEPARATED WIN/LOSS STATS\n")
         if (losses > 0):
             print("Average Moves (Loss)", sum(lossMoves)/len(lossMoves))
@@ -505,3 +602,50 @@ class PerformanceTester:
             print("Average Moves (Loss)", sum(winMoves)/len(winMoves))
             print("Average Time (Loss)", sum(winTimes)/len(winTimes),"seconds")
         print("\n")
+
+
+def check_boards(b1, b2):
+    ''' check if two boards are the same '''
+    for r in range(4):
+        for c in range(4):
+            if b1.get_value((r,c)) != b2.get_value((r,c)):
+                    return False
+    return True
+
+
+def simulate_move(board : GameBoard, dir):
+    """
+    simulates the given move and returns board.
+
+    """
+    """TODO: don't allow a move if it doesn't change anything"""
+
+    newBoard = board
+
+    newBoard._shift_pieces(dir)
+
+    newBoard._combine_pieces(dir)
+
+    return newBoard
+
+def print_new_board(board):
+    ts = [[" ", " ", " ", " "], [" ", " ", " ", " "],
+              [" ", " ", " ", " "], [" ", " ", " ", " "]]
+    for r in range(4):
+        for c in range(4):
+            if board.get_value((r, c)) != 0:
+                ts[r][c] = str(board.get_value((r, c)))
+
+    printed_board = f"""
+    -----------------
+    | {ts[0][0]} | {ts[0][1]} | {ts[0][2]} | {ts[0][3]} |
+    -----------------
+    | {ts[1][0]} | {ts[1][1]} | {ts[1][2]} | {ts[1][3]} |
+    -----------------
+    | {ts[2][0]} | {ts[2][1]} | {ts[2][2]} | {ts[2][3]} |
+    -----------------
+    | {ts[3][0]} | {ts[3][1]} | {ts[3][2]} | {ts[3][3]} |
+    -----------------
+    """
+
+    print(printed_board)

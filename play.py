@@ -8,7 +8,7 @@ Main Program To Play The Game
 
 parser = argparse.ArgumentParser(description = "This program runs 2048 with given settings")
 parser.add_argument("-player", help = "self = you play; computer = computer plays [default]")
-parser.add_argument("-agent", help = "self = you play; computer = computer plays")
+parser.add_argument("-agent", help = "which agent to use (see list)")
 parser.add_argument("-iter", help = "number of AI iterations")
 parser.add_argument("-graphics", help = "whether to show graphics (AI Only). Any argument is True, default is False")
 # parser.add_argument("-outSize", help = "small = small output, large = large output. Default: small")
@@ -22,7 +22,9 @@ args = parser.parse_args()
 # Dictionary of the Game Agents
 gameAgentDict = {
     "DownRightGameAgent":ai.DownRightGameAgent,
-    "RandomGameAgent":ai.RandomGameAgent
+    "RandomGameAgent":ai.RandomGameAgent,
+    "GreedyAgent": ai.GreedyAgent,
+    "MinimaxAgent":ai.MinimaxAgent
     }
 
 if args.player == 'self' :
@@ -36,7 +38,8 @@ elif args.player == 'computer' or args.player == None:
         if (args.agent not in gameAgentDict.keys()):
             print("Game Agent not in gameAgentDict. Be sure to add it!")
             print("Current options are:")
-            print(gameAgentDict)
+            for key in gameAgentDict.keys():
+                print(key)
         else:
             if (args.iter != None):
                 if (args.graphics != None):
