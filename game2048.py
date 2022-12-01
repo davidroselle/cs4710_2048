@@ -599,8 +599,8 @@ class PerformanceTester:
             print("Average Moves (Loss)", sum(lossMoves)/len(lossMoves))
             print("Average Time (Loss)", sum(lossTimes)/len(lossTimes),"seconds")
         if (wins > 0):
-            print("Average Moves (Loss)", sum(winMoves)/len(winMoves))
-            print("Average Time (Loss)", sum(winTimes)/len(winTimes),"seconds")
+            print("Average Moves (Win)", sum(winMoves)/len(winMoves))
+            print("Average Time (Win)", sum(winTimes)/len(winTimes),"seconds")
         print("\n")
 
 
