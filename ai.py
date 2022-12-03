@@ -83,36 +83,91 @@ class RandomGameAgent(GenericGameAgent) :
         
 
 class GreedyAgent(GenericGameAgent):
+    '''Greedy agent that moves are scored based on gridscore'''
+
     def __init__(self, gameBoard):
         self.gameBoard = gameBoard
         self.previousMove = game2048.Direction.DOWN
         self.moves = 0
 
     def compute(self):
-        '''
-
-        current version just tries to keep bigger numbers in down right corner
-
-        Probably this will be replaced by the minimax agent and minimax agent needs to be improved with better
-        heuristics
-
-        '''
+        '''Returns the move that should be done by the agent'''
         self.moves += 1
         bestMove = None
         maxScore = 0
-
         for nextMove in game2048.Direction:
             initial = game2048.GameBoard()  # copy of initial board
             for r in range(4):
                 for c in range(4):
                     initial.set_value((r, c), self.gameBoard.get_value((r, c)))
-            temp_board = game2048.simulate_move(initial, nextMove)
-            total = calculate_with_grid(temp_board)
-            if total >= maxScore:
-                maxScore = total
+                # print("initial board : " + "\n")
+                # game2048.print_new_board(initial)
+            score = self.calculateScore(initial, nextMove)
+            if score >= maxScore:
+                maxScore = score
                 bestMove = nextMove
-
         return bestMove
+
+    def calculateScore(self, board, move):
+        initial = game2048.GameBoard()  # copy of initial board
+        for r in range(4):
+            for c in range(4):
+                initial.set_value((r, c), board.get_value((r, c)))
+        newBoard = game2048.simulate_move(initial, move)
+        if game2048.check_boards(board, newBoard):
+            return 0
+        return self.generateScore(newBoard, 0, 1)
+
+    def generateScore(self, board, depth, depthLimit):
+        ''' depthLimit makes sure recursion ends. Could be extended to a greater number than 1 but takes LONG '''
+        if depth == depthLimit:
+            return self.calculateFinalScore(board)
+
+        total = 0
+        for r in range(4):
+            for c in range(4):
+                if board.get_value((r,c)) == 0:
+                    newBoard2 = board
+                    newBoard2.set_value((r,c), 2)
+                    moveScore2 = self.calculateMoveScore(newBoard2, depth, depthLimit)
+                    total += (0.7*moveScore2) #proba based on whether new_piece is 2 or 4.
+                    newBoard4 = board
+                    newBoard4.set_value((r,c), 4)
+                    moveScore4 = self.calculateMoveScore(newBoard4, depth, depthLimit)
+                    total += (0.3*moveScore4)
+        return total
+
+    def calculateMoveScore(self, board, depth, depthLimit):
+        maxScore = 0
+        for move in game2048.Direction:
+            initial = game2048.GameBoard()  # copy of initial board
+            for r in range(4):
+                for c in range(4):
+                    initial.set_value((r, c), board.get_value((r, c)))
+            newBoard = game2048.simulate_move(initial, move)
+            if not game2048.check_boards(board, newBoard):
+                score = self.generateScore(newBoard, depth+1, depthLimit)
+                maxScore = max(score, maxScore)
+        return maxScore
+
+    def calculateFinalScore(self, board):
+        '''
+
+        similar to evaluation function in pacman
+        need to figure out values (different factors?)
+
+        Scores based on totalValue which is based on grid score.
+
+        '''
+        empty = 0
+        for r in range(4):
+            for c in range(4):
+                if board.get_value((r,c)) == 0:
+                    empty += 1
+
+        totalValue = calculate_with_grid(board)
+
+        return totalValue
 
 class MinimaxAgent(GenericGameAgent):
     '''MiniMaxi agent similar to the implementation of our pacman agent.'''
