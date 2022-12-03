@@ -33,7 +33,7 @@ class GameBoard:
         new_board = GameBoard()
         new_board.board = self.board.copy()
         return new_board
-    
+
     def create_new_game(self):
         """Makes a new game following the standard convention of putting 2 blocks of value 2 or 4 on the board"""
 
@@ -42,7 +42,6 @@ class GameBoard:
         self._place_piece(block_1)
         block_2 = GamePiece(value=2)
         self._place_piece(block_2)
-        
 
     def play_as_person(self):
         '''Play the game as a person (as opposed to the computer'''
@@ -50,7 +49,7 @@ class GameBoard:
         self.create_new_game()
         self.__begin_game()
 
-    def play_as_computer(self, gameAgent:ai.GenericGameAgent):
+    def play_as_computer(self, gameAgent: ai.GenericGameAgent):
         '''Play the game as a computer. takes in the gameAgent
         :return: [moves:int, win:bool, time:double]
         '''
@@ -60,47 +59,45 @@ class GameBoard:
         if (self.graphics):
             print("Initial Board")
         self.print(smallBoard=True)
-        
+
         while True:
             if (self._check_if_lose()):
                 if (self.graphics):
-                    print("After",agent.moves,"moves, you lost")
+                    print("After", agent.moves, "moves, you lost")
                     print("YOU LOSE THE GAME")
                 endTime = time.perf_counter()
                 return [agent.moves, False, endTime-startTime]
                 break
-            
-            
-            
 
             self.move(agent.compute())
             self.print(smallBoard=True)
-            
+
             if self.win_game() == True:
                 if (self.graphics):
-                    print("After",agent.moves,"moves, you won")
+                    print("After", agent.moves, "moves, you won")
                     print("YOU WON THE GAME!")
                 endTime = time.perf_counter()
                 return [agent.moves, True, endTime-startTime]
                 break
-    
+
     def gameover(self):
         """Checks if the game is over or not"""
         return self._check_if_lose() or self.win_game()
 
     def choose_random_legal_move(self):
         """For use in monte carlo, returns a legal random move (but doesnt execute it)"""
-        move_options = [game2048.Direction.DOWN,game2048.Direction.UP,game2048.Direction.LEFT,game2048.Direction.RIGHT]
+        move_options = [game2048.Direction.DOWN, game2048.Direction.UP,
+                        game2048.Direction.LEFT, game2048.Direction.RIGHT]
         move = random.choice(move_options)
         while not self.check_if_move_legal(move):
             # If the move is illegal, pick a different one
-            
+
             move = random.choice(move_options)
         return move
 
     def check_if_move_legal(self, move):
         """Checks if a given move is even possible/allowed"""
-        
+
         if (move == Direction.DOWN):
             for col in range(4):
                 # This isn't super elegant, but basically checks for a space to move down to below a tile
@@ -125,7 +122,7 @@ class GameBoard:
                 has_space_above = False
                 # Also check if two identical pieces are netx to each other (allowing a move)
                 previous_piece = None
-                for row in [3,2,1,0]:
+                for row in [3, 2, 1, 0]:
                     # like down except checks the other way
                     pieceVal = self.get_value((row, col))
                     if self.get_value((row, col)) != 0:
@@ -163,7 +160,7 @@ class GameBoard:
                 has_space_left = False
                 # Also check if two identical pieces are netx to each other (allowing a move)
                 previous_piece = None
-                for col in [3,2,1,0]:
+                for col in [3, 2, 1, 0]:
                     pieceVal = self.get_value((row, col))
                     # like down except checks the other way
                     if self.get_value((row, col)) != 0:
@@ -179,9 +176,66 @@ class GameBoard:
         # print("Illegal Move Detected!")
         return False
 
+    def get_empty(self):
+        empties = 0
+        for row in range(4):
+            for col in range(4):
+                if self.get_value((row, col)) == 0:
+                    empties += 1
 
+        return empties
 
+    def smoothness(self):
+        """
+        :cite: https://github.com/Kulbear/endless-2048/blob/939479e6ae5d4dae6fb636c9803f8d4ebf5be0e8/agent/minimax_agent.py#L148
+        """
 
+        smoothness = 0
+        for row in range(4):
+            for col in range(3):
+                smoothness += abs(self.get_value((row, col)) -
+                                  self.get_value((row, col+1)))
+                pass
+        for row2 in range(3):
+            for col2 in range(4):
+                smoothness += abs(self.get_value((row2, col2)) -
+                                  self.get_value((row2+1, col2)))
+
+        return smoothness
+
+    def monotonicity(self):
+        """
+        :cite: https://github.com/Kulbear/endless-2048/blob/939479e6ae5d4dae6fb636c9803f8d4ebf5be0e8/agent/minimax_agent.py#L148
+        """
+
+        mono = 0
+
+        for row in range(4):
+            diff = self.get_value((row, 0)) - self.get_value((row, 1))
+            for col in range(3):
+                if (self.get_value((row, col)) - self.get_value((row, col+1))) * diff <= 0:
+                    mono += 1
+                diff = self.get_value((row, col)) - \
+                    self.get_value((row, col+1))
+
+        for col in range(4):
+            diff = self.get_value((0, row)) - self.get_value((1, row))
+            for row in range(3):
+                if (self.get_value((row, col)) - self.get_value((row+1, col))) * diff <= 0:
+                    mono += 1
+                diff = self.get_value((row, col)) - \
+                    self.get_value((row+1, col))
+
+        return mono
+
+    def get_all_legal_moves(self):
+        move_options = [game2048.Direction.DOWN, game2048.Direction.UP,
+                        game2048.Direction.LEFT, game2048.Direction.RIGHT]
+        legal = []
+        for move in move_options:
+            if self.check_if_move_legal(move):
+                legal.append(move)
+        return legal
 
     def __begin_game(self):
         """Playing game as person"""
@@ -262,7 +316,7 @@ class GameBoard:
     def win_game(self):
         for r in range(4):
             for c in range(4):
-                if self.get_value((r, c)) == 2048: #revert to 2048
+                if self.get_value((r, c)) == 2048:  # revert to 2048
                     return True
         return False
 
@@ -285,14 +339,14 @@ class GameBoard:
         # First, shift everything so it is correct without doing any combinations
 
         # External is the row iterator for left/right; columns for up/down
-        
+
         for external in range(4):
             if dir == Direction.DOWN or dir == Direction.RIGHT:
                 spot_to_place = 3
             else:
                 spot_to_place = 0
             for internal in range(4):
-               
+
                 # Now split based on whether down or up
                 if dir == Direction.DOWN:
                     # Makes sense to go backwards
@@ -322,7 +376,7 @@ class GameBoard:
                             external, internal, external, spot_to_place)
                         spot_to_place += 1
                 elif dir == Direction.RIGHT:
-                    
+
                     reverse_index = 3-internal
                     # Now, starting from the bottom spot shift a non-empty game piece as far down as possible
                     if self.get_value((external, reverse_index)) != 0:
@@ -363,7 +417,7 @@ class GameBoard:
                     # note that now external is rows, while internal is columns
                     if (internal <= 2):
                         # Now, starting from the bottom spot check if the spot above it is the same
-                        if self.get_value((external, internal)) == self.get_value((external,internal+1)):
+                        if self.get_value((external, internal)) == self.get_value((external, internal+1)):
                             self._perform_combination(
                                 external, internal,  external, internal+1, dir)
                         # else:
@@ -374,23 +428,23 @@ class GameBoard:
 
                     if (reverse_index >= 1):
                         # Now, starting from the bottom spot check if the spot above it is the same
-                        if self.get_value((external, reverse_index)) == self.get_value((external,reverse_index-1)):
+                        if self.get_value((external, reverse_index)) == self.get_value((external, reverse_index-1)):
                             self._perform_combination(
                                 external, reverse_index,  external, reverse_index-1, dir)
-    
+
     def max_tile(self):
         '''returns the largest tile on the board'''
         largest = 0
         for row in range(4):
             for col in range(4):
-                largest = max(self.get_value((row,col)),largest)
+                largest = max(self.get_value((row, col)), largest)
 
         return largest
 
     def move(self, dir):
         """
         Core function of when an key is pressed
-        
+
         """
         if dir == None:
             return
@@ -405,8 +459,6 @@ class GameBoard:
         self._place_piece(new_piece)
         if (self.graphics):
             print("Moved "+str(dir))
-
-
 
     def _shift_one_piece(self, row, column, new_row, new_column):
         """Helper function within the move function that shifts a single piece on a gameBoard in a provided direction\n
@@ -453,7 +505,7 @@ class GameBoard:
             # create a table of all needed strings
             # ts is a list of table strings
             ts = [[" ", " ", " ", " "], [" ", " ", " ", " "],
-                [" ", " ", " ", " "], [" ", " ", " ", " "]]
+                  [" ", " ", " ", " "], [" ", " ", " ", " "]]
             for r in range(4):
                 for c in range(4):
                     if self.get_value((r, c)) != 0:
@@ -555,13 +607,15 @@ class GamePiece:
     def make_empty(self):
         self.value = 0
 
+
 class PerformanceTester:
     """Class that runs the AI multiple times and outputs the results
     :gameAgent: Game Agent (AI) to run
     :iterations: the number of times to run the program
     :graphics: whether to output the graphics of each game (not reccomended unless iterations below 5)
     """
-    def __init__(self, gameAgent : ai.GenericGameAgent, iterations=100, graphics=False):
+
+    def __init__(self, gameAgent: ai.GenericGameAgent, iterations=100, graphics=False):
         self.gameAgent = gameAgent
         self.iterations = iterations
         self.graphics = graphics
@@ -575,19 +629,21 @@ class PerformanceTester:
             board.create_new_game()
             result = board.play_as_computer(gameAgent=self.gameAgent)
             self.results.append(result)
-            
+
             print("Progress: "+str(i+1)+"/"+str(self.iterations))
-            
+
         # print("Execution Complete")
         self.__interpretResults()
-    
+
     def __interpretResults(self):
         """Creates a readable post-mortem of the run"""
-        topBar = "-"*len("| Game Agent "+str(self.gameAgent)+ "|")
+        topBar = "-"*len("| Game Agent "+str(self.gameAgent) + "|")
         print("\n"+topBar)
-        print("| POST-RUN RESULTS"+  " "*(len("| Game Agent "+str(self.gameAgent))-len("| POST-RUN RESULTS"))+" |")
-        print("| Game Agent",self.gameAgent,'|')
-        print("| Iterations "+str(self.iterations)+  " "*(len("| Game Agent "+str(self.gameAgent))-len("| Iterations "+str(self.iterations)))+" |")
+        print("| POST-RUN RESULTS" + " "*(len("| Game Agent " +
+              str(self.gameAgent))-len("| POST-RUN RESULTS"))+" |")
+        print("| Game Agent", self.gameAgent, '|')
+        print("| Iterations "+str(self.iterations) + " "*(len("| Game Agent " +
+              str(self.gameAgent))-len("| Iterations "+str(self.iterations)))+" |")
         print(topBar)
 
         if (self.iterations == 0):
@@ -608,32 +664,34 @@ class PerformanceTester:
             allWins.append(res[1])
             allTimes.append(res[2])
             if res[1]:
-                wins +=1
+                wins += 1
                 winMoves.append(res[0])
                 winTimes.append(res[2])
             else:
-                losses +=1
+                losses += 1
                 lossMoves.append(res[0])
                 lossTimes.append(res[2])
             if (res[0] != 0):
                 allTimesPerMove.append(res[2]/res[0])
         print("\nOVERALL STATS\n")
-        print("Total Wins",wins)
+        print("Total Wins", wins)
         print("Total Losses", losses)
-        print("Total Run Time", sum(allTimes),"seconds")
+        print("Total Run Time", sum(allTimes), "seconds")
         print("Average Moves (Overall)", sum(allMoves)/len(allMoves))
-        print("Average Time (Overall)", sum(allTimes)/len(allTimes),"seconds")
+        print("Average Time (Overall)", sum(allTimes)/len(allTimes), "seconds")
         try:
-            print("Time per Move (Overall)",'{0:.10f}'.format(sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
+            print("Time per Move (Overall)", '{0:.10f}'.format(
+                sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
         except:
             print("Printing error with division by 0")
         print("\nSEPARATED WIN/LOSS STATS\n")
         if (losses > 0):
             print("Average Moves (Loss)", sum(lossMoves)/len(lossMoves))
-            print("Average Time (Loss)", sum(lossTimes)/len(lossTimes),"seconds")
+            print("Average Time (Loss)", sum(
+                lossTimes)/len(lossTimes), "seconds")
         if (wins > 0):
             print("Average Moves (Win)", sum(winMoves)/len(winMoves))
-            print("Average Time (Win)", sum(winTimes)/len(winTimes),"seconds")
+            print("Average Time (Win)", sum(winTimes)/len(winTimes), "seconds")
         print("\n")
 
 
@@ -641,12 +699,12 @@ def check_boards(b1, b2):
     ''' check if two boards are the same '''
     for r in range(4):
         for c in range(4):
-            if b1.get_value((r,c)) != b2.get_value((r,c)):
-                    return False
+            if b1.get_value((r, c)) != b2.get_value((r, c)):
+                return False
     return True
 
 
-def simulate_move(board : GameBoard, dir):
+def simulate_move(board: GameBoard, dir):
     """
     simulates the given move and returns board.
 
@@ -661,9 +719,10 @@ def simulate_move(board : GameBoard, dir):
 
     return newBoard
 
+
 def print_new_board(board):
     ts = [[" ", " ", " ", " "], [" ", " ", " ", " "],
-              [" ", " ", " ", " "], [" ", " ", " ", " "]]
+          [" ", " ", " ", " "], [" ", " ", " ", " "]]
     for r in range(4):
         for c in range(4):
             if board.get_value((r, c)) != 0:
