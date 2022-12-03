@@ -24,7 +24,8 @@ gameAgentDict = {
     "DownRightGameAgent":ai.DownRightGameAgent,
     "RandomGameAgent":ai.RandomGameAgent,
     "GreedyAgent": ai.GreedyAgent,
-    "MinimaxAgent":ai.MinimaxAgent
+    "MinimaxAgent":ai.MinimaxAgent,
+    "MonteCarloAgent":ai.MonteCarloAgent
     }
 
 if args.player == 'self' :

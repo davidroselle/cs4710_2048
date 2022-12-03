@@ -28,14 +28,19 @@ class GameBoard:
                 self.board[r][c].value = 0
         self.graphics = graphics
 
-  
+    def copy(self):
+        """Method to make a carbon copy of a GameBoard """
+        new_board = GameBoard()
+        new_board.board = self.board.copy()
+        return new_board
+    
     def create_new_game(self):
         """Makes a new game following the standard convention of putting 2 blocks of value 2 or 4 on the board"""
 
         self._clear_board()
-        block_1 = GamePiece(valueList={2: 0.7, 4: 0.3})
+        block_1 = GamePiece(value=2)
         self._place_piece(block_1)
-        block_2 = GamePiece(valueList={2: 0.7, 4: 0.3})
+        block_2 = GamePiece(value=2)
         self._place_piece(block_2)
         
 
@@ -78,6 +83,20 @@ class GameBoard:
                 endTime = time.perf_counter()
                 return [agent.moves, True, endTime-startTime]
                 break
+    
+    def gameover(self):
+        """Checks if the game is over or not"""
+        return self._check_if_lose() or self.win_game()
+
+    def choose_random_legal_move(self):
+        """For use in monte carlo, returns a legal random move (but doesnt execute it)"""
+        move_options = [game2048.Direction.DOWN,game2048.Direction.UP,game2048.Direction.LEFT,game2048.Direction.RIGHT]
+        move = random.choice(move_options)
+        while not self.check_if_move_legal(move):
+            # If the move is illegal, pick a different one
+            
+            move = random.choice(move_options)
+        return move
 
     def check_if_move_legal(self, move):
         """Checks if a given move is even possible/allowed"""
@@ -243,7 +262,7 @@ class GameBoard:
     def win_game(self):
         for r in range(4):
             for c in range(4):
-                if self.get_value((r, c)) == 2048:
+                if self.get_value((r, c)) == 2048: #revert to 2048
                     return True
         return False
 
@@ -358,6 +377,15 @@ class GameBoard:
                         if self.get_value((external, reverse_index)) == self.get_value((external,reverse_index-1)):
                             self._perform_combination(
                                 external, reverse_index,  external, reverse_index-1, dir)
+    
+    def max_tile(self):
+        '''returns the largest tile on the board'''
+        largest = 0
+        for row in range(4):
+            for col in range(4):
+                largest = max(self.get_value((row,col)),largest)
+
+        return largest
 
     def move(self, dir):
         """
@@ -414,13 +442,14 @@ class GameBoard:
         # Shift after a combination to keep it in line
         self._shift_pieces(dir)
 
-    def print(self, smallBoard=True):
+    def print(self, smallBoard=True, override=False):
         """
         Prints the board in a human readable way
         :smallBoard: Bool that prints the board in a smaller and more efficient way if True
+        :override: shows graphics regardless (for debugging)
         :return: Nothing
         """
-        if (self.graphics):
+        if (self.graphics or override):
             # create a table of all needed strings
             # ts is a list of table strings
             ts = [[" ", " ", " ", " "], [" ", " ", " ", " "],
@@ -547,7 +576,7 @@ class PerformanceTester:
             result = board.play_as_computer(gameAgent=self.gameAgent)
             self.results.append(result)
             
-            print("Progress: "+str(i)+"/"+str(self.iterations))
+            print("Progress: "+str(i+1)+"/"+str(self.iterations))
             
         # print("Execution Complete")
         self.__interpretResults()
@@ -586,14 +615,18 @@ class PerformanceTester:
                 losses +=1
                 lossMoves.append(res[0])
                 lossTimes.append(res[2])
-            allTimesPerMove.append(res[2]/res[0])
+            if (res[0] != 0):
+                allTimesPerMove.append(res[2]/res[0])
         print("\nOVERALL STATS\n")
         print("Total Wins",wins)
         print("Total Losses", losses)
         print("Total Run Time", sum(allTimes),"seconds")
         print("Average Moves (Overall)", sum(allMoves)/len(allMoves))
         print("Average Time (Overall)", sum(allTimes)/len(allTimes),"seconds")
-        print("Time per Move (Overall)",'{0:.10f}'.format(sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
+        try:
+            print("Time per Move (Overall)",'{0:.10f}'.format(sum(allTimesPerMove)/len(allTimesPerMove)), "seconds")
+        except:
+            print("Printing error with division by 0")
         print("\nSEPARATED WIN/LOSS STATS\n")
         if (losses > 0):
             print("Average Moves (Loss)", sum(lossMoves)/len(lossMoves))

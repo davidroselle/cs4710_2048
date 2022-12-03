@@ -1,5 +1,6 @@
 '''Put AI Code Here'''
 
+import copy
 from enum import Enum
 import random
 import game2048
@@ -209,6 +210,7 @@ class MinimaxAgent(GenericGameAgent):
         return score
 
 def calculate_with_grid(board):
+
     '''
 
     idea: https://medium.com/@bartoszzadrony/beginners-guide-to-ai-and-writing-your-own-bot-for-the-2048-game-4b8083faaf53
@@ -240,3 +242,47 @@ def calculate_with_grid(board):
             score += gridScore.get_value((r, c)) * board.get_value((r, c))
 
     return score
+
+
+class MonteCarloAgent(GenericGameAgent):
+    """Monte Carlo Game Agent
+    :cite: https://gabrielromualdo.com/articles/2020-09-12-using-the-monte-carlo-tree-search-algorithm-in-an-ai-to-beat-2048-and-other-games
+    """
+    def __init__(self, gameBoard):
+        self.gameBoard : game2048.GameBoard = gameBoard
+        self.previousMove = game2048.Direction.DOWN
+        self.moves = 0
+
+    def compute(self):    
+        sims = 1000
+
+        move_options = [game2048.Direction.DOWN,game2048.Direction.UP,game2048.Direction.LEFT,game2048.Direction.RIGHT]
+        move_scores = [0,0,0,0]
+        for move in move_options:
+            # print("progress",move)
+            for i in range(sims//4):
+                # print("progress2",i)
+                sim_board : game2048.GameBoard = game2048.GameBoard()
+
+                sim_board.board = copy.deepcopy(self.gameBoard.board)
+                # print("progress3")
+                # sim_board.print(override=True)
+                # print("VS")
+                # self.gameBoard.print(override=True)
+                sim_board.move(move)
+                while not sim_board.gameover():
+                    move2 = sim_board.choose_random_legal_move()
+                    # print("MOVING",move2,i)
+                    sim_board.move(move2)
+                # print("GAME OVER")
+                # sim_board.print(override=True)
+                # Because our only goal is to win the game, not maximize score, we simply add 1 if there was a victory
+                
+                move_scores[move_options.index(move)] += calculate_with_grid(sim_board)
+                
+                # print("SCORE",move_scores)
+        ret_move = move_options[move_scores.index(max(move_scores))]
+        # print("Returning",ret_move)
+        self.moves+=1
+        self.previousMove = ret_move
+        return ret_move
