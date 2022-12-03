@@ -87,7 +87,6 @@ class GreedyAgent(GenericGameAgent):
 
     def __init__(self, gameBoard):
         self.gameBoard = gameBoard
-        self.previousMove = game2048.Direction.DOWN
         self.moves = 0
 
     def compute(self):
@@ -159,22 +158,18 @@ class GreedyAgent(GenericGameAgent):
         Scores based on totalValue which is based on grid score.
 
         '''
-        empty = 0
-        for r in range(4):
-            for c in range(4):
-                if board.get_value((r,c)) == 0:
-                    empty += 1
+        empty = empty_tiles(board)
 
-        totalValue = calculate_with_grid(board)
+        totalValue = calculate_with_grid_snake(board)
 
-        return totalValue
+        score = 0.9 * empty + 0.1 * totalValue
+        return score
 
 class MinimaxAgent(GenericGameAgent):
     '''MiniMaxi agent similar to the implementation of our pacman agent.'''
 
     def __init__(self, gameBoard):
         self.gameBoard = gameBoard
-        self.previousMove = game2048.Direction.DOWN
         self.moves = 0
 
     def compute(self):
@@ -252,22 +247,20 @@ class MinimaxAgent(GenericGameAgent):
         from research: smoothness and monotonicity (!!)
 
         '''
-        empty = 0
-        for r in range(4):
-            for c in range(4):
-                if board.get_value((r,c)) == 0:
-                    empty += 1
+        empty = empty_tiles(board)
 
         totalValue = calculate_with_grid(board)
 
-        score = 0.9*empty + 0.1*totalValue
+        monotonicity = calculate_monotonicity(board)
+
+        smoothness = calculate_smoothness(board)
+
+        score = empty + monotonicity - smoothness
         return score
 
-def calculate_with_grid(board):
+def calculate_with_grid_snake(board):
     '''
-
     idea: https://medium.com/@bartoszzadrony/beginners-guide-to-ai-and-writing-your-own-bot-for-the-2048-game-4b8083faaf53
-
     '''
 
     score = 0
@@ -295,3 +288,78 @@ def calculate_with_grid(board):
             score += gridScore.get_value((r, c)) * board.get_value((r, c))
 
     return score
+
+def calculate_with_grid(board):
+    '''
+
+    idea: https://medium.com/@bartoszzadrony/beginners-guide-to-ai-and-writing-your-own-bot-for-the-2048-game-4b8083faaf53
+
+    '''
+
+    score = 0
+
+    gridScore = game2048.GameBoard()
+    gridScore.set_value((0, 0), 0)
+    gridScore.set_value((0, 1), 1)
+    gridScore.set_value((0, 2), 2)
+    gridScore.set_value((0, 3), 3)
+    gridScore.set_value((1, 0), 1)
+    gridScore.set_value((1, 1), 2)
+    gridScore.set_value((1, 2), 3)
+    gridScore.set_value((1, 3), 4)
+    gridScore.set_value((2, 0), 2)
+    gridScore.set_value((2, 1), 3)
+    gridScore.set_value((2, 2), 4)
+    gridScore.set_value((2, 3), 5)
+    gridScore.set_value((3, 0), 3)
+    gridScore.set_value((3, 1), 4)
+    gridScore.set_value((3, 2), 5)
+    gridScore.set_value((3, 3), 6)
+
+    for r in range(4):
+        for c in range(4):
+            score += gridScore.get_value((r, c)) * board.get_value((r, c))
+
+    return score
+
+def calculate_smoothness(board):
+    ''' acts as a penalty if large numbers are scattered '''
+    score = 0
+
+    for r in range(3):
+        for c in range(4):
+            score += abs(board.get_value((r,c)) - board.get_value((r+1,c)))
+
+    for r in range(4):
+        for c in range(3):
+            score += abs(board.get_value((r,c)) - board.get_value((r,c+1)))
+
+    return score
+
+def calculate_monotonicity(board):
+    score=0
+
+    for r in range(3):
+        difference = board.get_value((r+1,0)) - board.get_value((r,0))
+        for c in range(4):
+            if (board.get_value((r, c)) - board.get_value((r+1, c))) * difference > 0:
+                score += 1
+            difference = board.get_value((r+1, c)) - board.get_value((r, c))
+
+    for r in range(4):
+        difference = board.get_value((r,1)) - board.get_value((r,0))
+        for c in range(3):
+            if (board.get_value((r, c+1)) - board.get_value((r, c))) * difference > 0:
+                score += 1
+            difference = board.get_value((r, c+1)) - board.get_value((r, c))
+
+    return score
+
+def empty_tiles(board):
+    empty = 0
+    for r in range(4):
+        for c in range(3):
+            if board.get_value((r,c)) == 0:
+                empty += 1
+    return empty
+
