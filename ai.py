@@ -160,7 +160,7 @@ class GreedyAgent(GenericGameAgent):
         '''
         empty = empty_tiles(board)
 
-        totalValue = calculate_with_grid_snake(board)
+        totalValue = calculate_with_grid(board)
 
         score = 0.9 * empty + 0.1 * totalValue
         return score
@@ -177,17 +177,19 @@ class MinimaxAgent(GenericGameAgent):
         self.moves += 1
         bestMove = None
         maxScore = 0
+
         for nextMove in game2048.Direction:
-            initial = game2048.GameBoard()  # copy of initial board
-            for r in range(4):
-                for c in range(4):
-                    initial.set_value((r, c), self.gameBoard.get_value((r, c)))
-                # print("initial board : " + "\n")
-                # game2048.print_new_board(initial)
-            score = self.calculateScore(initial, nextMove)
-            if score >= maxScore:
-                maxScore = score
-                bestMove = nextMove
+            if self.gameBoard.check_if_move_legal(nextMove):
+                initial = game2048.GameBoard()  # copy of initial board
+                for r in range(4):
+                    for c in range(4):
+                        initial.set_value((r, c), self.gameBoard.get_value((r, c)))
+                    # print("initial board : " + "\n")
+                    # game2048.print_new_board(initial)
+                score = self.calculateScore(initial, nextMove)
+                if score >= maxScore:
+                    maxScore = score
+                    bestMove = nextMove
         return bestMove
 
     def calculateScore(self, board, move):
@@ -249,16 +251,17 @@ class MinimaxAgent(GenericGameAgent):
         '''
         empty = empty_tiles(board)
 
-        totalValue = calculate_with_grid(board)
+        totalValue = calculate_with_total_grid(board)
 
         monotonicity = calculate_monotonicity(board)
 
         smoothness = calculate_smoothness(board)
 
-        score = empty + monotonicity - smoothness
+        score = (empty**2) + smoothness + monotonicity + totalValue
+
         return score
 
-def calculate_with_grid_snake(board):
+def calculate_with_grid(board):
     '''
     idea: https://medium.com/@bartoszzadrony/beginners-guide-to-ai-and-writing-your-own-bot-for-the-2048-game-4b8083faaf53
     '''
@@ -289,32 +292,26 @@ def calculate_with_grid_snake(board):
 
     return score
 
-def calculate_with_grid(board):
-    '''
-
-    idea: https://medium.com/@bartoszzadrony/beginners-guide-to-ai-and-writing-your-own-bot-for-the-2048-game-4b8083faaf53
-
-    '''
-
+def calculate_with_total_grid(board):
     score = 0
 
     gridScore = game2048.GameBoard()
-    gridScore.set_value((0, 0), 0)
-    gridScore.set_value((0, 1), 1)
-    gridScore.set_value((0, 2), 2)
-    gridScore.set_value((0, 3), 3)
-    gridScore.set_value((1, 0), 1)
-    gridScore.set_value((1, 1), 2)
-    gridScore.set_value((1, 2), 3)
-    gridScore.set_value((1, 3), 4)
-    gridScore.set_value((2, 0), 2)
-    gridScore.set_value((2, 1), 3)
-    gridScore.set_value((2, 2), 4)
-    gridScore.set_value((2, 3), 5)
-    gridScore.set_value((3, 0), 3)
-    gridScore.set_value((3, 1), 4)
-    gridScore.set_value((3, 2), 5)
-    gridScore.set_value((3, 3), 6)
+    gridScore.set_value((0, 0), 4**1)
+    gridScore.set_value((0, 1), 4**2)
+    gridScore.set_value((0, 2), 4**3)
+    gridScore.set_value((0, 3), 4**4)
+    gridScore.set_value((1, 0), 4**2)
+    gridScore.set_value((1, 1), 4**3)
+    gridScore.set_value((1, 2), 4**4)
+    gridScore.set_value((1, 3), 4**5)
+    gridScore.set_value((2, 0), 4**3)
+    gridScore.set_value((2, 1), 4**4)
+    gridScore.set_value((2, 2), 4**5)
+    gridScore.set_value((2, 3), 4**6)
+    gridScore.set_value((3, 0), 4**4)
+    gridScore.set_value((3, 1), 4**5)
+    gridScore.set_value((3, 2), 4**6)
+    gridScore.set_value((3, 3), 4**7)
 
     for r in range(4):
         for c in range(4):
@@ -322,19 +319,23 @@ def calculate_with_grid(board):
 
     return score
 
+
 def calculate_smoothness(board):
-    ''' acts as a penalty if large numbers are scattered '''
+    ''' check if adjacent numbers are the same '''
     score = 0
 
     for r in range(3):
         for c in range(4):
-            score += abs(board.get_value((r,c)) - board.get_value((r+1,c)))
+            if board.get_value((r,c)) - board.get_value((r+1,c)):
+                score += 1
 
     for r in range(4):
         for c in range(3):
-            score += abs(board.get_value((r,c)) - board.get_value((r,c+1)))
+            if board.get_value((r,c)) == board.get_value((r,c+1)):
+                score += 1
 
     return score
+
 
 def calculate_monotonicity(board):
     score=0
@@ -342,16 +343,16 @@ def calculate_monotonicity(board):
     for r in range(3):
         difference = board.get_value((r+1,0)) - board.get_value((r,0))
         for c in range(4):
-            if (board.get_value((r, c)) - board.get_value((r+1, c))) * difference > 0:
+            if (board.get_value((r+1, c)) - board.get_value((r, c))) * difference >= 0:
                 score += 1
-            difference = board.get_value((r+1, c)) - board.get_value((r, c))
+                difference = board.get_value((r + 1, 0)) - board.get_value((r, 0))
 
     for r in range(4):
         difference = board.get_value((r,1)) - board.get_value((r,0))
         for c in range(3):
-            if (board.get_value((r, c+1)) - board.get_value((r, c))) * difference > 0:
+            if (board.get_value((r, c+1)) - board.get_value((r, c))) * difference >= 0:
                 score += 1
-            difference = board.get_value((r, c+1)) - board.get_value((r, c))
+                difference = board.get_value((r, c+1)) - board.get_value((r, c))
 
     return score
 

@@ -221,17 +221,19 @@ class GameBoard:
         self.board[position[0]][position[1]] = game_piece
 
     def _check_if_lose(self):
-        """ Checks a board to see if the player should lose by counting the number of empty GamePieces
-        :return: True if Lose, False otherwise
         """
+        if board is full and no tiles can combine
+        """
+        initial = game2048.GameBoard()  # copy of initial board
+        for r in range(4):
+            for c in range(4):
+                initial.set_value((r, c), self.board[r][c].value)
 
-        for row in range(4):
-            for col in range(4):
-                if (self.get_value((row, col)) == 0):
-                    # if there is even a single empty square, this is not a loss
-                    return False
-        # If an empty was never found, then it's a loss
-        return True
+        if check_full_board(initial):
+            if check_adjacent(initial) == 0:
+                return True
+            return False
+        return False
 
     def _clear_board(self):
         """Clear the board to setup for a new game"""
@@ -605,7 +607,7 @@ class PerformanceTester:
 
 
 def check_boards(b1, b2):
-    ''' check if two boards are the same '''
+    ''' check if two boards are the same: True if same'''
     for r in range(4):
         for c in range(4):
             if b1.get_value((r,c)) != b2.get_value((r,c)):
@@ -649,3 +651,27 @@ def print_new_board(board):
     """
 
     print(printed_board)
+
+def check_full_board(board):
+    for row in range(4):
+        for col in range(4):
+            if board.get_value((row, col)) == 0:
+                # if there is even a single empty square, this is not a loss
+                return False
+    # If an empty was never found, then it's a loss
+    return True
+
+
+def check_adjacent(board) -> int:
+    score = 0
+    for r in range(3):
+        for c in range(4):
+            if board.get_value((r,c)) == board.get_value((r+1,c)):
+                score += 1
+
+    for r in range(4):
+        for c in range(3):
+            if board.get_value((r,c)) == board.get_value((r,c+1)):
+                score += 1
+
+    return score
